@@ -1506,51 +1506,121 @@ a { color: inherit; }
   border: 0;
 }
 
+.install-app-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--paper);
+  font-size: 14px;
+}
+
+.install-app-hint[hidden] { display: none !important; }
+.install-app-hint strong { color: var(--deep); }
+.install-app-hint button {
+  min-height: 42px;
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 1px solid var(--deep);
+  color: var(--deep);
+  background: var(--blue-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.install-app-hint button:hover,
+.install-app-hint button:focus-visible { border-color: var(--blue); outline: none; background: #d8f3f6; }
+
+.install-guide-dialog {
+  width: min(380px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  margin: auto;
+  padding: 22px 20px 18px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--blue);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.install-guide-dialog::backdrop { background: rgba(16, 44, 58, .34); }
+.install-guide-dialog h2 { margin: 0 24px 9px 0; color: var(--deep); font-size: 21px; }
+.install-guide-dialog p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+.install-guide-dialog ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+.install-guide-dialog li + li { margin-top: 7px; }
+
 @media (max-width: 1160px) {
   .scroll-hint { display: block; }
 }
 
 @media (max-width: 760px) {
-  .page-frame { width: min(100% - 28px, var(--page-width)); }
+  html { scroll-padding-top: 90px; }
+  body {
+    overflow-x: clip;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    background-image: none;
+    font-size: 16px;
+  }
+  .page-frame { width: min(100% - 20px, var(--page-width)); }
   .race-masthead { grid-template-columns: 1fr; min-height: 0; }
-  .race-masthead-copy { min-height: 0; padding: 14px 16px 13px; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, .2); }
-  .race-topline { align-items: flex-start; flex-direction: column; gap: 3px; }
-  .race-clock { align-self: flex-start; font-size: 10px; }
-  .race-masthead-copy h1 { max-width: 100%; margin-top: 5px; font-size: 28px; }
+  .race-masthead { border-left-width: 3px; }
+  .race-masthead-copy { min-height: 0; padding: 13px 14px 12px; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, .2); }
+  .race-topline { align-items: center; flex-direction: row; gap: 8px; }
+  .race-kicker,
+  .race-term { font-size: 10px; letter-spacing: .07em; }
+  .race-clock { display: none; }
+  .race-masthead-copy h1 { max-width: 100%; margin-top: 7px; font-size: clamp(25px, 7vw, 32px); text-wrap: balance; }
   .race-week-line { gap: 6px; font-size: 14px; }
   .race-week-line strong { font-size: 18px; }
-  .race-meta-line { gap: 7px; margin-top: 8px; font-size: 12px; }
-  .race-meta-line strong { font-size: 20px; }
+  .race-meta-line { gap: 7px; margin-top: 9px; font-size: 13px; }
+  .race-meta-line strong { font-size: 19px; }
   .race-meta-line .fact-status { font-size: 11px; }
-  .race-live-line { gap: 6px; margin-top: 8px; font-size: 11px; }
+  .race-live-line { gap: 6px; margin-top: 9px; font-size: 12px; }
   .race-live-label { font-size: 9px; }
   .race-phase-strip { display: none; }
-  .race-masthead-art { min-height: 170px; }
-  .circuit-watermark { inset: 11px 12px 10px 10px; }
-  .telemetry-toast { right: 8px; bottom: 8px; max-width: calc(100% - 16px); font-size: 8px; }
-  .telemetry-toast-kicker,
-  .telemetry-toast-status { font-size: 7px; }
-  .hero-figure-bay { width: 66%; min-height: 170px; }
-  .official-driver { right: -10px; bottom: -18px; width: min(130%, 250px); height: 184px; }
-  .circuit-watermark-label { top: 7px; left: 6px; font-size: 9px; }
-  .circuit-watermark-label strong { font-size: 14px; }
-  .circuit-watermark-sub { left: 6px; bottom: 3px; font-size: 7px; }
-  .page-content { margin-top: 16px; margin-bottom: 30px; }
-  .week-toolbar { justify-content: stretch; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding: 12px 0 13px; }
-  .toolbar-title { width: 100%; margin-right: 0; padding: 4px 0 3px 12px; }
-  .toolbar-actions { width: 100%; }
-  .toolbar-actions .calendar-control { flex: 1 1 100%; }
-  .calendar-button { width: 100%; }
+  .race-masthead-art { min-height: 86px; }
+  .circuit-watermark { inset: 8px 10px 7px 8px; opacity: .52; }
+  .telemetry-toast { display: none; }
+  .hero-figure-bay { width: 56%; min-height: 86px; }
+  .official-driver { right: -8px; bottom: -13px; width: min(140%, 180px); height: 112px; }
+  .circuit-watermark-label { top: 5px; left: 5px; font-size: 8px; }
+  .circuit-watermark-label strong { font-size: 12px; }
+  .circuit-watermark-sub { display: none; }
+  .race-masthead:hover .official-driver { transform: none; }
+  .page-content { margin-top: max(8px, env(safe-area-inset-top)); margin-bottom: 24px; }
+  .week-toolbar { top: max(0px, env(safe-area-inset-top)); justify-content: stretch; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 8px 0 9px; }
+  .toolbar-title { display: none; }
+  .toolbar-actions { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .toolbar-actions .calendar-control { grid-column: 1 / -1; }
+  .calendar-button { width: 100%; min-width: 0; }
   .week-calendar { left: 0; transform: none; }
+  .today-button { min-height: 46px; height: 46px; padding: 0 15px; }
+  .view-switch { grid-column: 1 / -1; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; border: 1px solid var(--line); }
+  .view-button { min-height: 42px; border: 0; font-size: 14px; }
+  .view-button + .view-button { border-left: 1px solid var(--line-soft); }
+  .view-button.is-active { border-bottom: 3px solid var(--orange); background: var(--blue-soft); }
   .adjustment-banner { margin-top: 14px; padding-top: 12px; padding-bottom: 11px; }
-  .schedule-section { margin-top: 27px; }
+  .install-app-hint { margin-top: 8px; padding: 8px 10px; font-size: 13px; }
+  .install-app-hint button { min-height: 42px; padding: 5px 10px; font-size: 13px; }
+  .schedule-section { margin-top: 24px; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-bottom: 7px; }
-  .section-heading-title { width: 100%; justify-content: space-between; }
-  .section-heading-title { gap: 12px; }
-  .section-mascot { width: 156px; height: 102px; margin: 0; }
+  .section-heading-title { width: 100%; gap: 8px; }
+  .section-heading h2 { font-size: 21px; text-wrap: balance; }
+  .section-mascot { display: none; }
   .schedule-scroll { display: none; }
   .scroll-hint { display: none; }
   .mobile-day-list { display: grid; }
+  .mobile-day-list { gap: 12px; }
+  .mobile-day { border: 1px solid var(--line); border-top: 3px solid var(--line); box-shadow: none; }
+  .mobile-day.is-today { border-top-color: var(--blue); }
+  .mobile-day-header { padding: 14px 12px; }
+  .mobile-day-content { padding: 8px 10px 12px; background: #f7fafb; }
+  .mobile-day-content .lesson-card { min-height: 104px; padding: 14px 13px 12px; border-left-width: 3px; border-bottom: 0; }
+  .mobile-day-content .lesson-name { font-size: 17px; }
+  .mobile-day-content .lesson-room { font-size: 14px; }
   .secondary-grid { grid-template-columns: 1fr; margin-top: 22px; }
   .summary-panel,
   .summary-panel + .summary-panel { padding: 16px 0; }
@@ -1603,14 +1673,14 @@ body.view-day .mobile-day-list { display: grid; }
   .race-week-line strong { font-size: 17px; }
   .race-meta-line { gap: 8px; }
   .race-meta-line .fact-status { flex-basis: 100%; padding-left: 0; border-left: 0; }
-  .race-masthead-art { min-height: 150px; }
+  .race-masthead-art { min-height: 96px; }
   .circuit-watermark { inset: 9px 7px 9px 7px; }
   .telemetry-toast { right: 7px; bottom: 7px; gap: 5px; padding: 3px 5px 3px 6px; }
   .circuit-watermark-label { top: 4px; left: 4px; font-size: 8px; }
   .circuit-watermark-label strong { font-size: 12px; }
   .circuit-watermark-sub { display: none; }
-  .hero-figure-bay { width: 70%; min-height: 150px; }
-  .official-driver { right: -8px; bottom: -14px; width: min(136%, 220px); height: 164px; }
+  .hero-figure-bay { width: 64%; min-height: 96px; }
+  .official-driver { right: -8px; bottom: -12px; width: min(136%, 150px); height: 124px; }
   .filter-switch { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter-button { width: 100%; border-right: 1px solid var(--line-soft); }
   .filter-button:nth-child(2n) { border-right: 0; }

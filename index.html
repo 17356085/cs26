@@ -2,12 +2,17 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#17242d" />
-    <meta name="description" content="计科课表 · 2026-2027-1｜计算机科学与技术专业课程表。" />
-    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="南苑课表" />
+    <meta name="description" content="南苑课表 · 2026-2027-1｜计算机科学与技术专业课程表。" />
+    <link rel="icon" href="./icons/course-schedule.png" type="image/png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/course-schedule.png" />
     <link rel="stylesheet" href="./styles.css" />
-    <title>计科课表 · 2026-2027-1</title>
+    <title>南苑课表 · 2026-2027-1</title>
   </head>
   <body>
     <a class="skip-link" href="#scheduleSection">跳到周课表</a>
@@ -47,7 +52,7 @@
           </div>
           <div class="race-masthead-art" aria-label="Spa-Francorchamps 赛道线稿与赛车初音 2025 SPA 透明立绘">
             <div class="circuit-watermark" aria-hidden="true">
-              <img class="spa-track-outline" src="./assets/spa-francorchamps-track-outline.svg" alt="" loading="eager" decoding="async" />
+              <img class="spa-track-outline" src="./assets/spa-francorchamps-track-outline.svg" alt="" loading="lazy" decoding="async" />
               <svg id="trackTelemetry" class="track-telemetry" viewBox="0 0 1415.7909 875.29749" preserveAspectRatio="xMinYMid meet">
                 <g id="trackTelemetryGeometry" class="track-telemetry-geometry" transform="translate(2047.7528,-153.52072)"></g>
                 <g id="trackTelemetryMarkerLayer" class="track-telemetry-marker-layer" transform="translate(2047.7528,-153.52072)">
@@ -59,7 +64,7 @@
               <span class="circuit-watermark-sub">ARDENNES CIRCUIT</span>
             </div>
             <div class="hero-figure-bay">
-              <img class="official-driver" src="./assets/racing-miku-2025-spa-cutout-trim.png" alt="赛车初音 2025 SPA 透明立绘" loading="eager" decoding="async" />
+              <img class="official-driver" src="./assets/racing-miku-2025-spa-cutout-trim.png" alt="赛车初音 2025 SPA 透明立绘" loading="lazy" decoding="async" />
             </div>
             <div id="telemetryToast" class="telemetry-toast" hidden role="status" aria-live="polite">
               <span id="telemetryToastKicker" class="telemetry-toast-kicker">S1</span>
@@ -114,6 +119,11 @@
             </div>
           </div>
         </section>
+
+        <div id="installAppHint" class="install-app-hint" hidden aria-live="polite">
+          <span><strong>下次更快</strong> 把课表放到手机主屏幕</span>
+          <button id="installAppButton" type="button">添加到主屏幕</button>
+        </div>
 
         <section id="adjustmentBanner" class="adjustment-banner" aria-live="polite" hidden>
           <span id="adjustmentBannerLabel" class="adjustment-label">安排</span>
@@ -203,7 +213,18 @@
       <div id="dialogContent"></div>
     </dialog>
 
+    <dialog id="installGuideDialog" class="install-guide-dialog" aria-labelledby="installGuideTitle">
+      <button id="closeInstallGuide" class="dialog-close" type="button" aria-label="关闭添加到主屏幕说明">×</button>
+      <h2 id="installGuideTitle">把南苑课表放到主屏幕</h2>
+      <p>下次不用再输入网址，直接点击手机桌面上的图标即可打开。</p>
+      <ul>
+        <li><strong>iPhone：</strong>在 Safari 点“分享”，选择“添加到主屏幕”。</li>
+        <li><strong>Android：</strong>在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</li>
+      </ul>
+    </dialog>
+
     <script src="./official-adjustments.js"></script>
     <script src="./app.js"></script>
+    <script src="./pwa.js"></script>
   </body>
 </html>

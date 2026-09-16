@@ -803,7 +803,11 @@ function renderDesktopSchedule(states) {
 }
 
 function renderMobileSchedule(states) {
-  mobileDayList.innerHTML = states.map((state) => {
+  const todayState = states.find((state) => state.iso === todayIso);
+  const mobileStates = todayState
+    ? [todayState, ...states.filter((state) => state.iso !== todayIso)]
+    : states;
+  mobileDayList.innerHTML = mobileStates.map((state) => {
     const todayClass = state.iso === todayIso ? " is-today" : "";
     const adjustedClass = state.adjustment ? " is-adjusted" : "";
     const holidayClass = state.holiday ? " is-holiday" : "";
