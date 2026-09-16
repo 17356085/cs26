@@ -1,4 +1,4 @@
-const CACHE_NAME = "cs26-shell-v2";
+const CACHE_NAME = "cs26-shell-v3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -7,7 +7,8 @@ const CORE_ASSETS = [
   "./official-adjustments.js",
   "./pwa.js",
   "./manifest.webmanifest",
-  "./icons/course-schedule.png"
+  "./icons/course-schedule-192.png",
+  "./icons/course-schedule-512.png"
 ];
 
 self.addEventListener("install", (event) => {

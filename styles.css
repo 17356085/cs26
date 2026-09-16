@@ -530,8 +530,7 @@ a { color: inherit; }
   padding-left: 10px;
 }
 
-.view-button,
-.filter-button {
+.view-button {
   min-height: 30px;
   padding: 3px 9px;
   border: 0;
@@ -541,26 +540,9 @@ a { color: inherit; }
   font-size: 14px;
 }
 
-.filter-button {
-  min-height: 32px;
-  padding: 4px 13px 3px;
-  border-top: 3px solid transparent;
-  border-right: 1px solid var(--line-soft);
-}
-
-.filter-button:last-child { border-right: 0; }
-.filter-button[data-filter="all"] { border-top-color: var(--deep); }
-.filter-button[data-filter="lecture"] { border-top-color: var(--blue); }
-.filter-button[data-filter="practice"] { border-top-color: var(--orange); }
-.filter-button[data-filter="night"] { border-top-color: var(--night); }
-
 .view-button:hover,
-.view-button:focus-visible,
-.filter-button:hover,
-.filter-button:focus-visible { color: var(--deep); outline: none; }
-.view-button.is-active,
-.filter-button.is-active { border-bottom-color: var(--orange); color: var(--deep); font-weight: 700; }
-.filter-button.is-active { background: #f1f7f8; }
+.view-button:focus-visible { color: var(--deep); outline: none; }
+.view-button.is-active { border-bottom-color: var(--orange); color: var(--deep); font-weight: 700; }
 
 .today-button,
 .calendar-button {
@@ -913,18 +895,6 @@ a { color: inherit; }
 
 .section-heading-title:hover .section-mascot,
 .section-heading-title:focus-within .section-mascot { transform: translate3d(2px, -3px, 0) rotate(-2deg); filter: drop-shadow(0 9px 8px rgba(16, 44, 58, .18)); }
-
-.table-controls {
-  display: block;
-}
-
-.filter-switch {
-  display: inline-flex;
-  align-items: stretch;
-  border: 1px solid var(--line);
-  border-bottom: 2px solid var(--deep);
-  background: rgba(255, 255, 255, .6);
-}
 
 .section-heading h2,
 .panel-heading h2 {
@@ -1446,19 +1416,23 @@ a { color: inherit; }
 .mobile-day-list { gap: 10px; touch-action: pan-y; }
 .mobile-day { display: grid; grid-template-columns: 228px minmax(0, 1fr); min-width: 0; border-top: 1px solid var(--line); background: var(--paper); box-shadow: 0 4px 12px rgba(16, 44, 58, .04); }
 .mobile-day.is-today { border-top: 3px solid var(--blue); }
-.mobile-day-header { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-width: 0; padding: 18px 16px; border-right: 1px solid var(--line); border-bottom: 0; }
+.mobile-day-header { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-width: 0; padding: 18px 16px; border-right: 1px solid var(--line); border-bottom: 0; appearance: none; width: 100%; border: 0; border-right: 1px solid var(--line); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mobile-day-header:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
 .mobile-day-header.is-adjusted { border-left: 3px solid var(--orange); background: var(--orange-soft); }
 .mobile-day-header.is-holiday { border-left: 3px solid var(--orange); background: #fff7f8; }
 .mobile-day-index { align-self: start; padding-top: 3px; color: var(--line); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 22px; font-weight: 800; line-height: 1; }
 .mobile-day-title { display: grid; min-width: 0; gap: 2px; }
+.mobile-day-label { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.mobile-day-badge { padding: 2px 6px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-size: 11px !important; font-weight: 800; line-height: 1.2; }
 .mobile-day-title strong { color: var(--deep); font-size: 21px; line-height: 1.1; }
 .mobile-day-title span { color: var(--muted); font-size: 13px; }
 .mobile-day-date { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mobile-day-count { color: var(--muted); font-size: 14px; white-space: nowrap; }
 .mobile-day-summary { display: grid; justify-items: end; gap: 6px; }
-.mobile-day-arrow { color: var(--orange); font-size: 18px; line-height: 1; transition: transform .18s ease; }
-.mobile-day:hover .mobile-day-arrow { transform: translate3d(3px, -3px, 0); }
+.mobile-day-arrow { color: var(--orange); font-size: 21px; line-height: 1; transition: transform .18s ease; }
+.mobile-day:not(.is-collapsed) .mobile-day-arrow { transform: rotate(180deg); }
 .mobile-day-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 320px)); justify-content: start; align-content: start; gap: 10px 12px; min-width: 0; padding: 14px 18px; }
+.mobile-day-content[hidden] { display: none; }
 .mobile-day-content .lesson-card { width: 100%; min-height: 116px; margin: 0; }
 .mobile-day-content .empty-day { min-height: 96px; }
 
@@ -1551,6 +1525,7 @@ a { color: inherit; }
 .install-guide-dialog p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
 .install-guide-dialog ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
 .install-guide-dialog li + li { margin-top: 7px; }
+.mobile-gesture-hint { display: none; }
 
 @media (max-width: 1160px) {
   .scroll-hint { display: block; }
@@ -1640,6 +1615,7 @@ a { color: inherit; }
   .mobile-day-title strong { font-size: 19px; }
   .mobile-day-content { grid-template-columns: 1fr; gap: 8px; padding: 10px 12px; }
   .mobile-day-content .lesson-card { width: 100%; min-height: 112px; }
+  .mobile-gesture-hint { display: block; margin: 10px 0 0; color: var(--faint); font-size: 12px; text-align: center; }
   .mobile-day-index { font-size: 19px; }
   .mobile-day-phase { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
   .mobile-day-phase.formation { color: var(--blue); }
@@ -1657,7 +1633,6 @@ body.view-day .scroll-hint { display: none; }
 body.view-day .mobile-day-list { display: grid; }
 
 @media (max-width: 760px) {
-  .table-controls { width: 100%; }
   .toolbar-actions { flex-wrap: wrap; }
   .view-switch { margin-left: 0; padding-left: 0; border-left: 0; border-top: 1px solid var(--line-soft); padding-top: 6px; width: 100%; }
   body.view-week .schedule-scroll { display: block; overflow-x: auto; }
@@ -1681,10 +1656,6 @@ body.view-day .mobile-day-list { display: grid; }
   .circuit-watermark-sub { display: none; }
   .hero-figure-bay { width: 64%; min-height: 96px; }
   .official-driver { right: -8px; bottom: -12px; width: min(136%, 150px); height: 124px; }
-  .filter-switch { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .filter-button { width: 100%; border-right: 1px solid var(--line-soft); }
-  .filter-button:nth-child(2n) { border-right: 0; }
-  .filter-button:nth-child(n+3) { border-top-width: 2px; }
   .panel-heading { gap: 8px; }
   .panel-heading-side { gap: 6px; }
   .notice-links { flex-direction: column; align-items: flex-end; gap: 2px; }

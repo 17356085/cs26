@@ -236,7 +236,6 @@ const telemetryToastStatus = $("#telemetryToastStatus");
 const telemetryAnnouncement = $("#telemetryAnnouncement");
 let telemetryToastTimer = 0;
 
-let lessonFilter = "all";
 const savedViewMode = (() => {
   try {
     const value = globalThis.localStorage?.getItem("course-schedule-view");
@@ -287,11 +286,7 @@ function getOfficialHoliday(iso) {
 }
 
 function getVisibleLessons(state) {
-  return state.lessons.filter((item) => {
-    if (lessonFilter === "all") return true;
-    if (lessonFilter === "night") return isNightLesson(item);
-    return item.type === lessonFilter;
-  });
+  return state.lessons;
 }
 
 function setViewMode(mode) {
@@ -303,16 +298,6 @@ function setViewMode(mode) {
   dayViewButton?.setAttribute?.("aria-pressed", String(viewMode === "day"));
   weekViewButton?.classList?.toggle?.("is-active", viewMode === "week");
   dayViewButton?.classList?.toggle?.("is-active", viewMode === "day");
-}
-
-function setLessonFilter(filter) {
-  lessonFilter = filter;
-  document.querySelectorAll?.(".filter-button").forEach((button) => {
-    const active = button.dataset.filter === lessonFilter;
-    button.classList.toggle("is-active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-  renderWeek();
 }
 
 function getDayState(date) {
@@ -804,6 +789,11 @@ function renderDesktopSchedule(states) {
 
 function renderMobileSchedule(states) {
   const todayState = states.find((state) => state.iso === todayIso);
+  const focusState = todayState
+    || states.find((state) => getVisibleLessons(state).length)
+    || states.find((state) => state.adjustment)
+    || states[0];
+  const focusIso = focusState?.iso;
   const mobileStates = todayState
     ? [todayState, ...states.filter((state) => state.iso !== todayIso)]
     : states;
@@ -813,19 +803,39 @@ function renderMobileSchedule(states) {
     const holidayClass = state.holiday ? " is-holiday" : "";
     const phase = getDayPhase(state, states);
     const lessons = getVisibleLessons(state);
-    const count = lessons.length ? `${lessons.length} 节` : state.adjustment ? "暂无对应课程" : state.holiday ? "休假" : state.lessons.length ? "当前筛选无课程" : state.naturalDay > 5 ? "" : "暂无课程";
+    const count = lessons.length ? `${lessons.length} 节` : state.adjustment ? "暂无对应课程" : state.holiday ? "休假" : "无安排";
+    const expanded = state.iso === focusIso;
+    const contentId = `mobile-day-content-${state.iso}`;
     const content = lessons.length
       ? lessons.map((item) => lessonMarkup(item, state, "mobile")).join("")
       : `<div class="empty-day"><span class="empty-phase ${phase.key}">${phase.code}</span>${count ? `<span>${count}</span>` : ""}</div>`;
-    return `<article class="mobile-day${todayClass}${adjustedClass}${holidayClass}" data-date="${state.iso}" data-day-index="${state.naturalDay}">
-      <header class="mobile-day-header${adjustedClass}${holidayClass}">
+    const todayBadge = state.iso === todayIso ? `<span class="mobile-day-badge">今天</span>` : "";
+    return `<article class="mobile-day${todayClass}${adjustedClass}${holidayClass}${expanded ? "" : " is-collapsed"}" data-date="${state.iso}" data-day-index="${state.naturalDay}">
+      <button class="mobile-day-header${adjustedClass}${holidayClass}" type="button" aria-expanded="${expanded}" aria-controls="${contentId}">
         <span class="mobile-day-index" aria-hidden="true">${String(state.naturalDay).padStart(2, "0")}</span>
-        <div class="mobile-day-title"><span class="mobile-day-phase ${phase.key}" title="${phase.en}">${phase.code}</span><strong>${DAY_NAMES[state.naturalDay]}</strong><span class="mobile-day-date">${formatMonthDay(parseDate(state.iso))}${state.adjustment ? ` · 按${formatShortDate(state.sourceIso)}课表` : ""}</span></div>
-        <div class="mobile-day-summary"><span class="mobile-day-count">${count}</span><span class="mobile-day-arrow" aria-hidden="true">↗</span></div>
-      </header>
-      <div class="mobile-day-content">${content}</div>
+        <div class="mobile-day-title"><div class="mobile-day-label"><span class="mobile-day-phase ${phase.key}" title="${phase.en}">${phase.code}</span>${todayBadge}</div><strong>${DAY_NAMES[state.naturalDay]}</strong><span class="mobile-day-date">${formatMonthDay(parseDate(state.iso))}${state.adjustment ? ` · 按${formatShortDate(state.sourceIso)}课表` : ""}</span></div>
+        <div class="mobile-day-summary"><span class="mobile-day-count">${count}</span><span class="mobile-day-arrow" aria-hidden="true">⌄</span></div>
+      </button>
+      <div id="${contentId}" class="mobile-day-content"${expanded ? "" : " hidden"}>${content}</div>
     </article>`;
   }).join("");
+}
+
+function setMobileDayExpanded(article, expanded) {
+  if (!article) return;
+  const toggle = article.querySelector(".mobile-day-header");
+  const content = article.querySelector(".mobile-day-content");
+  article.classList.toggle("is-collapsed", !expanded);
+  toggle?.setAttribute?.("aria-expanded", String(expanded));
+  if (content) content.hidden = !expanded;
+}
+
+function handleMobileDayToggle(event) {
+  const toggle = event.target.closest?.(".mobile-day-header");
+  if (!toggle) return;
+  const article = toggle.closest(".mobile-day");
+  if (!article) return;
+  setMobileDayExpanded(article, toggle.getAttribute("aria-expanded") !== "true");
 }
 
 function renderOverview(states) {
@@ -983,7 +993,9 @@ function changeWeek(nextWeek) {
 function focusDayInDayView(dayIndex) {
   setViewMode("day");
   window.requestAnimationFrame(() => {
-    mobileDayList.querySelector(`[data-day-index="${dayIndex}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const day = mobileDayList.querySelector(`[data-day-index="${dayIndex}"]`);
+    setMobileDayExpanded(day, true);
+    day?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 
@@ -1032,17 +1044,24 @@ document.addEventListener("click", (event) => {
 });
 weekViewButton?.addEventListener?.("click", () => setViewMode("week"));
 dayViewButton?.addEventListener?.("click", () => setViewMode("day"));
-document.querySelectorAll?.(".filter-button").forEach((button) => {
-  button.addEventListener("click", () => setLessonFilter(button.dataset.filter));
-});
 $("#todayButton").addEventListener("click", () => {
   const todayWeek = getWeekNumber(parseDate(todayIso));
   calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(todayIso)));
+  if (isCompactViewport) setViewMode("day");
   changeWeek(todayWeek >= 1 && todayWeek <= WEEKS.length ? todayWeek : 1);
-  $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
+  window.requestAnimationFrame(() => {
+    const today = mobileDayList.querySelector(`[data-date="${todayIso}"]`);
+    if (isCompactViewport && today) {
+      setMobileDayExpanded(today, true);
+      today.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
 });
 
 scheduleGrid.addEventListener("click", handleLessonClick);
+mobileDayList.addEventListener("click", handleMobileDayToggle);
 mobileDayList.addEventListener("click", handleLessonClick);
 let touchStart = null;
 mobileDayList.addEventListener("touchstart", (event) => {

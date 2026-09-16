@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="南苑课表" />
     <meta name="description" content="南苑课表 · 2026-2027-1｜计算机科学与技术专业课程表。" />
-    <link rel="icon" href="./icons/course-schedule.png" type="image/png" />
+    <link rel="icon" href="./icons/course-schedule-512.png" type="image/png" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./icons/course-schedule.png" />
+    <link rel="apple-touch-icon" href="./icons/course-schedule-192.png" />
     <link rel="stylesheet" href="./styles.css" />
     <title>南苑课表 · 2026-2027-1</title>
   </head>
@@ -40,7 +40,7 @@
             </div>
             <div class="race-live-line" aria-live="polite">
               <span class="live-pulse" aria-hidden="true"></span>
-              <span class="race-live-label">NEXT RUN</span>
+              <span class="race-live-label">下一节课</span>
               <span id="nextLesson">正在读取下一节课</span>
             </div>
             <div id="phaseStrip" class="race-phase-strip" aria-label="一周节奏">
@@ -82,7 +82,7 @@
           <div class="toolbar-actions">
             <div class="calendar-control">
               <button id="calendarButton" class="calendar-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="weekCalendar">
-                <span class="calendar-button-kicker">2026–2027 · 第1学期</span>
+                <span class="calendar-button-kicker">选择教学周</span>
                 <span id="calendarButtonLabel">第 2 周 · 9月14日–9月20日</span>
                 <span class="calendar-glyph" aria-hidden="true">▦</span>
               </button>
@@ -115,15 +115,10 @@
             <button id="todayButton" class="today-button" type="button">今天</button>
             <div class="view-switch" role="group" aria-label="视图模式">
               <button id="weekViewButton" class="view-button is-active" type="button" aria-pressed="true">周表</button>
-              <button id="dayViewButton" class="view-button" type="button" aria-pressed="false">日程</button>
+              <button id="dayViewButton" class="view-button" type="button" aria-pressed="false">按天</button>
             </div>
           </div>
         </section>
-
-        <div id="installAppHint" class="install-app-hint" hidden aria-live="polite">
-          <span><strong>下次更快</strong> 把课表放到手机主屏幕</span>
-          <button id="installAppButton" type="button">添加到主屏幕</button>
-        </div>
 
         <section id="adjustmentBanner" class="adjustment-banner" aria-live="polite" hidden>
           <span id="adjustmentBannerLabel" class="adjustment-label">安排</span>
@@ -139,14 +134,6 @@
               <h2 id="scheduleTitle">周课表</h2>
               <img class="section-mascot" src="./assets/racing-miku-2025-spa-pose-02-trim.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             </div>
-            <div class="table-controls">
-              <div class="filter-switch" role="group" aria-label="课程类型筛选">
-                <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部</button>
-                <button class="filter-button" type="button" data-filter="lecture" aria-pressed="false">课程</button>
-                <button class="filter-button" type="button" data-filter="practice" aria-pressed="false">实训</button>
-                <button class="filter-button" type="button" data-filter="night" aria-pressed="false">晚课</button>
-              </div>
-            </div>
           </div>
 
           <div class="schedule-scroll" aria-label="周课表，可左右滑动查看">
@@ -161,7 +148,13 @@
           <p class="scroll-hint">周表可横向拖动；日程视图按日期连续查看</p>
 
           <div class="mobile-day-list" id="mobileDayList"></div>
+          <p class="mobile-gesture-hint">左右滑动切换教学周 · 点按日期展开课程</p>
         </section>
+
+        <div id="installAppHint" class="install-app-hint" hidden aria-live="polite">
+          <span id="installAppHintCopy"><strong>下次更快</strong> 把课表放到手机主屏幕</span>
+          <button id="installAppButton" type="button">添加到主屏幕</button>
+        </div>
 
         <section class="secondary-grid" aria-label="课表辅助信息">
           <article class="summary-panel" aria-labelledby="weekOverviewTitle">
@@ -218,8 +211,9 @@
       <h2 id="installGuideTitle">把南苑课表放到主屏幕</h2>
       <p>下次不用再输入网址，直接点击手机桌面上的图标即可打开。</p>
       <ul>
-        <li><strong>iPhone：</strong>在 Safari 点“分享”，选择“添加到主屏幕”。</li>
-        <li><strong>Android：</strong>在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</li>
+        <li id="iosInstallSteps"><strong>iPhone：</strong>在 Safari 点“分享” → “添加到主屏幕”。</li>
+        <li id="androidInstallSteps" hidden><strong>Android：</strong>Chrome 点右上角“⋮” → “安装应用”；如果没有，就选“添加到主屏幕”。</li>
+        <li id="embeddedAndroidInstallSteps" hidden><strong>微信/QQ 内打开：</strong>先点右上角“⋮”选择“在浏览器中打开”，再按 Android 步骤添加。</li>
       </ul>
     </dialog>
 
