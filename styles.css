@@ -16,9 +16,9 @@
   --night: #3f58a4;
   --night-soft: #eef1ff;
   --aqua: #76e2d3;
-  --period-rows: 104px 54px 110px 54px 110px 102px 112px 112px;
-  --table-height: 758px;
-  --page-width: 1800px;
+  --period-rows: 6.5rem 3.375rem 6.875rem 3.375rem 6.875rem 6.375rem 7rem 7rem;
+  --table-height: 47.375rem;
+  --page-width: 1600px;
 }
 
 * { box-sizing: border-box; }
@@ -1413,29 +1413,6 @@ a { color: inherit; }
 .source-credit:hover,
 .source-credit:focus-visible { color: var(--blue); text-decoration: underline; outline: none; }
 
-.mobile-day-list { gap: 10px; touch-action: pan-y; }
-.mobile-day { display: grid; grid-template-columns: 228px minmax(0, 1fr); min-width: 0; border-top: 1px solid var(--line); background: var(--paper); box-shadow: 0 4px 12px rgba(16, 44, 58, .04); }
-.mobile-day.is-today { border-top: 3px solid var(--blue); }
-.mobile-day-header { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-width: 0; padding: 18px 16px; border-right: 1px solid var(--line); border-bottom: 0; appearance: none; width: 100%; border: 0; border-right: 1px solid var(--line); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.mobile-day-header:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
-.mobile-day-header.is-adjusted { border-left: 3px solid var(--orange); background: var(--orange-soft); }
-.mobile-day-header.is-holiday { border-left: 3px solid var(--orange); background: #fff7f8; }
-.mobile-day-index { align-self: start; padding-top: 3px; color: var(--line); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 22px; font-weight: 800; line-height: 1; }
-.mobile-day-title { display: grid; min-width: 0; gap: 2px; }
-.mobile-day-label { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.mobile-day-badge { padding: 2px 6px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-size: 11px !important; font-weight: 800; line-height: 1.2; }
-.mobile-day-title strong { color: var(--deep); font-size: 21px; line-height: 1.1; }
-.mobile-day-title span { color: var(--muted); font-size: 13px; }
-.mobile-day-date { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mobile-day-count { color: var(--muted); font-size: 14px; white-space: nowrap; }
-.mobile-day-summary { display: grid; justify-items: end; gap: 6px; }
-.mobile-day-arrow { color: var(--orange); font-size: 21px; line-height: 1; transition: transform .18s ease; }
-.mobile-day:not(.is-collapsed) .mobile-day-arrow { transform: rotate(180deg); }
-.mobile-day-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 320px)); justify-content: start; align-content: start; gap: 10px 12px; min-width: 0; padding: 14px 18px; }
-.mobile-day-content[hidden] { display: none; }
-.mobile-day-content .lesson-card { width: 100%; min-height: 116px; margin: 0; }
-.mobile-day-content .empty-day { min-height: 96px; }
-
 .lesson-dialog {
   position: fixed;
   inset: auto;
@@ -1527,160 +1504,324 @@ a { color: inherit; }
 .install-guide-dialog li + li { margin-top: 7px; }
 .mobile-gesture-hint { display: none; }
 
-@media (max-width: 1160px) {
-  .scroll-hint { display: block; }
+/* Daily-use layout: compact race identity, immediate course information. */
+html { scroll-padding-top: 6.25rem; }
+body { font-size: 1rem; background-size: 48px 48px; }
+button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button, a, summary { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #007c97; outline-offset: 3px;
 }
-
-@media (max-width: 760px) {
-  html { scroll-padding-top: 90px; }
-  body {
-    overflow-x: clip;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-    background-image: none;
-    font-size: 16px;
-  }
-  .page-frame { width: min(100% - 20px, var(--page-width)); }
-  .race-masthead { grid-template-columns: 1fr; min-height: 0; }
-  .race-masthead { border-left-width: 3px; }
-  .race-masthead-copy { min-height: 0; padding: 13px 14px 12px; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, .2); }
-  .race-topline { align-items: center; flex-direction: row; gap: 8px; }
-  .race-kicker,
-  .race-term { font-size: 10px; letter-spacing: .07em; }
-  .race-clock { display: none; }
-  .race-masthead-copy h1 { max-width: 100%; margin-top: 7px; font-size: clamp(25px, 7vw, 32px); text-wrap: balance; }
-  .race-week-line { gap: 6px; font-size: 14px; }
-  .race-week-line strong { font-size: 18px; }
-  .race-meta-line { gap: 7px; margin-top: 9px; font-size: 13px; }
-  .race-meta-line strong { font-size: 19px; }
-  .race-meta-line .fact-status { font-size: 11px; }
-  .race-live-line { gap: 6px; margin-top: 9px; font-size: 12px; }
-  .race-live-label { font-size: 9px; }
-  .race-phase-strip { display: none; }
-  .race-masthead-art { min-height: 86px; }
-  .circuit-watermark { inset: 8px 10px 7px 8px; opacity: .52; }
-  .telemetry-toast { display: none; }
-  .hero-figure-bay { width: 56%; min-height: 86px; }
-  .official-driver { right: -8px; bottom: -13px; width: min(140%, 180px); height: 112px; }
-  .circuit-watermark-label { top: 5px; left: 5px; font-size: 8px; }
-  .circuit-watermark-label strong { font-size: 12px; }
-  .circuit-watermark-sub { display: none; }
-  .race-masthead:hover .official-driver { transform: none; }
-  .page-content { margin-top: max(8px, env(safe-area-inset-top)); margin-bottom: 24px; }
-  .week-toolbar { top: max(0px, env(safe-area-inset-top)); justify-content: stretch; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 8px 0 9px; }
-  .toolbar-title { display: none; }
-  .toolbar-actions { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-  .toolbar-actions .calendar-control { grid-column: 1 / -1; }
-  .calendar-button { width: 100%; min-width: 0; }
-  .week-calendar { left: 0; transform: none; }
-  .today-button { min-height: 46px; height: 46px; padding: 0 15px; }
-  .view-switch { grid-column: 1 / -1; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; border: 1px solid var(--line); }
-  .view-button { min-height: 42px; border: 0; font-size: 14px; }
-  .view-button + .view-button { border-left: 1px solid var(--line-soft); }
-  .view-button.is-active { border-bottom: 3px solid var(--orange); background: var(--blue-soft); }
-  .adjustment-banner { margin-top: 14px; padding-top: 12px; padding-bottom: 11px; }
-  .install-app-hint { margin-top: 8px; padding: 8px 10px; font-size: 13px; }
-  .install-app-hint button { min-height: 42px; padding: 5px 10px; font-size: 13px; }
-  .schedule-section { margin-top: 24px; }
-  .section-heading { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-bottom: 7px; }
-  .section-heading-title { width: 100%; gap: 8px; }
-  .section-heading h2 { font-size: 21px; text-wrap: balance; }
-  .section-mascot { display: none; }
-  .schedule-scroll { display: none; }
-  .scroll-hint { display: none; }
-  .mobile-day-list { display: grid; }
-  .mobile-day-list { gap: 12px; }
-  .mobile-day { border: 1px solid var(--line); border-top: 3px solid var(--line); box-shadow: none; }
-  .mobile-day.is-today { border-top-color: var(--blue); }
-  .mobile-day-header { padding: 14px 12px; }
-  .mobile-day-content { padding: 8px 10px 12px; background: #f7fafb; }
-  .mobile-day-content .lesson-card { min-height: 104px; padding: 14px 13px 12px; border-left-width: 3px; border-bottom: 0; }
-  .mobile-day-content .lesson-name { font-size: 17px; }
-  .mobile-day-content .lesson-room { font-size: 14px; }
-  .secondary-grid { grid-template-columns: 1fr; margin-top: 22px; }
-  .summary-panel,
-  .summary-panel + .summary-panel { padding: 16px 0; }
-  .summary-panel + .summary-panel { border-top: 1px solid var(--line); border-left: 0; }
-  .overview-body { min-height: 188px; }
-  .overview-list { max-width: 100%; }
-  .overview-mascot-slot { width: 96px; height: 54px; }
-  .overview-mascot { width: 96px; height: 54px; }
-  .notice-entry { grid-template-columns: 1fr; gap: 4px; }
-  .notice-entry-detail { justify-content: flex-start; }
-  .notice-entry-detail span { text-align: left; }
-  .notice-links { gap: 7px; }
-  .data-note { align-items: flex-start; flex-direction: column; gap: 2px; }
-  .footer-inner { align-items: flex-start; flex-direction: column; gap: 5px; }
-  .mobile-day { display: block; }
-  .mobile-day-header { grid-template-columns: 25px minmax(0, 1fr) auto; gap: 10px; padding: 14px 12px; border-right: 0; border-bottom: 1px solid var(--line-soft); }
-  .mobile-day-title strong { font-size: 19px; }
-  .mobile-day-content { grid-template-columns: 1fr; gap: 8px; padding: 10px 12px; }
-  .mobile-day-content .lesson-card { width: 100%; min-height: 112px; }
-  .mobile-gesture-hint { display: block; margin: 10px 0 0; color: var(--faint); font-size: 12px; text-align: center; }
-  .mobile-day-index { font-size: 19px; }
-  .mobile-day-phase { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-  .mobile-day-phase.formation { color: var(--blue); }
-  .mobile-day-phase.flying,
-  .mobile-day-phase.adjusted { color: var(--orange); }
-  .mobile-day-phase.pit { color: var(--night); }
-}
-
-/* Explicit workspace modes: the weekly grid and the mobile-style day list
-   remain available on every screen instead of being tied only to a breakpoint. */
+button:disabled { cursor: default; opacity: .4; }
+[hidden] { display: none !important; }
+.page-content { margin-top: 20px; }
+.race-masthead { grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); min-height: 0; border-radius: 14px; box-shadow: 0 12px 32px #102c3a12; }
+.race-masthead-copy { padding: 20px 28px; border-right-color: #ffffff12; }
+.race-topline { align-items: center; flex-wrap: wrap; gap: 4px 16px; }
+.race-kicker, .race-term, .race-clock { font-size: .75rem; }
+.race-term { color: #b9d1d8; }
+.race-clock { margin-left: auto; letter-spacing: 0; }
+.race-masthead-copy h1 { margin: 9px 0 6px; font-size: 2rem; letter-spacing: .015em; }
+.race-week-line { font-size: .9375rem; }
+.race-week-line strong { font-size: 1.125rem; }
+.race-meta-line { margin-top: 8px; gap: 8px; font-size: .875rem; }
+.race-meta-line strong { font-size: 1rem; }
+.race-meta-line .fact-status { color: #b3e9e3; font-size: .8125rem; }
+.race-phase-strip { display: none; }
+.next-lesson { display: flex; align-items: center; gap: 16px; width: 100%; min-width: 0; margin-top: 14px; padding: 12px 14px; border: 1px solid #76e2d330; border-left: 3px solid var(--aqua); border-radius: 8px; color: white; background: #ffffff08; text-align: left; }
+.next-lesson:hover:not(:disabled) { background: #ffffff12; border-color: #76e2d380; }
+.next-lesson:focus-visible { outline-color: var(--aqua); }
+.next-lesson:disabled { opacity: 1; }
+.next-lesson:disabled .next-lesson-arrow { display: none; }
+.next-lesson.is-live { border-left-color: #fb7491; }
+.next-lesson-main { display: grid; min-width: 0; flex: 1; gap: 5px; }
+.next-lesson-top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--aqua); font-size: .875rem; }
+#nextLessonStatus { color: #dceef1; font-variant-numeric: tabular-nums; }
+#nextLesson { white-space: normal; overflow: visible; font-size: 1.1875rem; line-height: 1.35; }
+.next-lesson-meta { color: #c6dde1; font-size: .875rem; line-height: 1.55; }
+.next-lesson-arrow { flex: 0 0 auto; align-self: center; color: var(--aqua); font-size: 1.5rem; }
+.race-masthead-art { min-height: 0; }
+.hero-figure-bay { min-height: 0; width: 86%; border: 0; }
+.official-driver { width: 100%; height: 100%; max-height: 290px; right: 0; bottom: -8px; object-fit: contain; }
+.circuit-watermark { inset: 20px; }
+.circuit-watermark-label, .circuit-watermark-sub { font-size: .75rem; letter-spacing: .07em; }
+.circuit-watermark-label { top: 0; left: 0; }
+.circuit-watermark-sub { left: 0; bottom: 0; }
+.spa-track-outline { opacity: .22; }
+.telemetry-toast, .telemetry-toast-kicker, .telemetry-toast-status { font-size: .75rem; }
+.week-toolbar { margin-top: 14px; top: 8px; padding: 10px 12px; border: 1px solid #d2dfe4; border-radius: 10px; background: #fffffff5; box-shadow: 0 4px 16px #102c3a0a; }
+.toolbar-actions { display: flex; width: 100%; gap: 10px; }
+.week-navigation { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.week-arrow { width: 44px; min-height: 46px; flex: 0 0 auto; padding: 0; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font-size: 1.75rem; line-height: 1; }
+.week-arrow:hover:not(:disabled) { background: var(--blue-soft); border-color: var(--blue); }
+.calendar-control { min-width: 0; }
+.calendar-button { min-width: 226px; height: auto; min-height: 46px; padding: 6px 12px; gap: 4px 14px; border-radius: 7px; }
+.calendar-button-kicker { font-family: inherit; font-size: .75rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+.calendar-button > span:nth-child(2) { font-size: .9375rem; }
+.calendar-glyph { font-size: 1.5rem; }
+.today-button { min-height: 46px; height: auto; border-radius: 7px; padding: 0 16px; font-size: .9375rem; }
+.view-switch { gap: 4px; margin-left: auto; padding: 4px; background: #ecf2f5; border: 1px solid #dde7ec; border-radius: 8px; }
+.view-button { min-height: 38px; padding: 6px 20px; border: 0; border-radius: 5px; font-size: .9375rem; color: #526b78; }
+.view-button.is-active { background: white; color: var(--deep); box-shadow: 0 2px 5px #102c3a14; }
+.view-button.is-active::after { content: ""; display: inline-block; margin-left: 7px; width: 4px; height: 12px; background: var(--orange); border-radius: 1px; vertical-align: -1px; }
+.adjustment-banner { margin-top: 12px; padding: 10px 14px; gap: 8px; border: 1px solid #f0d0da; border-left: 3px solid var(--orange); border-radius: 8px; background: #fff5f7; }
+.adjustment-copy { flex: 1; min-width: 0; gap: 4px 8px; }
+.adjustment-copy strong { font-size: .9375rem; }
+.adjustment-copy span, .adjustment-label { font-size: .875rem; }
+.schedule-section { margin-top: 20px; scroll-margin-top: 6.25rem; }
+.section-heading { margin-bottom: 12px; padding: 0; gap: 12px; border: 0; }
+.section-heading-title { gap: 8px; }
+.section-heading h2, .panel-heading h2 { font-family: inherit; font-size: 1.125rem; letter-spacing: 0; }
+.course-legend { display: flex; align-items: center; gap: 16px; color: var(--ink-soft); font-size: .8125rem; }
+.course-legend span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; margin-right: 6px; background: var(--blue); }
+.course-legend .legend-practice::before { background: var(--orange); }
+.course-legend .legend-night::before { background: var(--night); }
+.schedule-scroll { overflow: auto; max-height: max(28rem, 72dvh); border: 1px solid #cbdce2; border-radius: 10px; box-shadow: 0 6px 18px #102c3a05; overscroll-behavior: contain; scrollbar-width: auto; }
+.schedule-table { min-width: 1038px; }
+.weekday-row { position: sticky; top: 0; z-index: 5; grid-template-columns: 72px repeat(7, minmax(138px, 1fr)); background: #f3f7f9; }
+.grid-corner, .weekday-cell { min-height: 72px; padding: 10px; background: #f3f7f9; }
+.grid-corner { font-size: .875rem; z-index: 6; }
+.grid-corner small { font-size: .75rem; color: var(--muted); }
+.weekday-main { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.day-name { font-size: 1rem; }
+.day-date { font-size: .8125rem; }
+.day-phase b, .day-note { font-size: .75rem; }
+.weekday-cell.is-today { background: #e2f6f9; }
+.weekday-cell.is-adjusted { background: #fff0f4; }
+.weekday-cell.is-holiday { background: #fff7f9; }
+.schedule-body { grid-template-columns: 72px minmax(966px, 1fr); }
+.schedule-grid { grid-template-columns: repeat(7, minmax(138px, 1fr)); }
+.slot-session, .time-slot > span:not(.slot-session) { font-size: .75rem; }
+.time-slot strong { font-size: .875rem; }
+.current-time-marker { z-index: 4; opacity: 1; }
+.current-time-marker span { font-size: .75rem; }
+.lesson-card { margin: 3px; padding: 9px 8px; border: 1px solid #dfebef; border-left: 3px solid var(--course-color); border-radius: 6px; background: #fff; }
+.lesson-card::before, .lesson-card::after { display: none; }
+.lesson-card.lecture { background: #f0fbfd; }
+.lesson-card.practice { background: #fff4f7; }
+.lesson-card.night { background: #f1f3ff; }
+.lesson-card:hover { background: white; box-shadow: 0 3px 10px #18374614; transform: translateY(-1px); }
+.lesson-card.is-live { border-color: #0392af; box-shadow: 0 0 0 1px #0392af; background: #e1f7fb; }
+.lesson-card.is-ended .lesson-name { color: #536975; }
+.lesson-content { display: flex; min-width: 0; width: 100%; flex-direction: column; gap: 4px; }
+.lesson-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 5px; margin: 0; padding-right: 0; }
+.lesson-kind, .lesson-time { font-size: .75rem; line-height: 1.2; }
+.lesson-kind { padding: 0; color: var(--course-color); background: transparent; }
+.lesson-time { font-variant-numeric: tabular-nums; }
+.lesson-name { font-size: .9375rem; line-height: 1.4; margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+.lesson-room { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 5px; margin: 0; padding-top: 0; color: #4e6977; font-size: .8125rem; line-height: 1.3; }
+.lesson-room::before { content: none; }
+.lesson-card:focus-visible { outline: 3px solid #007c97; outline-offset: -2px; }
+.schedule-grid .lesson-card:hover, .schedule-grid .lesson-card:focus-visible { transform: none; }
+.schedule-grid .lesson-status { display: none; }
+.schedule-grid .lesson-content { gap: 3px; }
+.schedule-grid .lesson-name { line-height: 1.35; }
+.lesson-status { margin-left: auto; font-size: .75rem; white-space: nowrap; color: #627b85; }
+.lesson-status:empty { display: none; }
+.is-live .lesson-status { color: #006d85; font-weight: 700; }
+.empty-phase { font-size: .875rem; }
+.scroll-hint { display: none; font-size: .75rem; color: var(--muted); }
+.day-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+.day-picker-button { position: relative; display: grid; justify-items: center; align-content: center; gap: 4px; min-width: 0; min-height: 86px; padding: 9px 4px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink-soft); background: #ffffffb0; font-size: .875rem; }
+.day-picker-button strong { font-size: 1.375rem; line-height: 1.25; font-variant-numeric: tabular-nums; font-weight: 650; }
+.day-picker-button small { font-size: .75rem; color: var(--muted); }
+.day-picker-button.is-today::after { content: ""; position: absolute; top: 0; width: 18px; height: 3px; background: var(--blue); border-radius: 0 0 2px 2px; }
+.day-picker-button.is-adjusted small { color: #c62252; }
+.day-picker-button.is-selected { color: white; background: var(--deep); border-color: var(--deep); box-shadow: 0 3px 8px #102c3a19; }
+.day-picker-button.is-selected small { color: #b5e5e3; }
+.day-picker-button.is-selected.is-adjusted small { color: #ffb3ca; }
+.day-picker-button:not(.is-selected):hover { background: var(--blue-soft); }
+.mobile-day-list { display: grid; touch-action: pan-y pinch-zoom; }
+.mobile-day { border: 1px solid var(--line); border-radius: 12px; background: white; padding: 20px 24px; }
+.agenda-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.agenda-heading h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0; font-size: 1.125rem; }
+.agenda-heading h3 > span { color: var(--ink-soft); font-size: .9375rem; font-weight: 400; }
+.agenda-heading > span { flex: 0 0 auto; color: var(--muted); font-size: .875rem; }
+.today-badge { padding: 2px 6px; border-radius: 4px; background: var(--blue-soft); color: #007c96; font-size: .75rem; font-weight: 600; }
+.agenda-adjustment { margin: 12px 0 0; padding: 8px 10px; border-radius: 6px; background: var(--orange-soft); color: #8f3454; font-size: .875rem; }
+.mobile-day-content { display: grid; gap: 8px; }
+.agenda-session { display: flex; align-items: center; gap: 10px; margin-top: 16px; color: var(--ink-soft); font-size: .875rem; }
+.agenda-session span { color: #758c97; font-family: ui-monospace, monospace; font-size: .75rem; }
+.agenda-session::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+.lesson-card.mobile { display: flex; flex-direction: row; align-items: center; gap: 18px; width: 100%; min-height: 90px; margin: 0; padding: 14px 16px; }
+.lesson-card.mobile .lesson-name { font-size: 1rem; }
+.lesson-card.mobile .lesson-room { font-size: .875rem; }
+.lesson-card.mobile .lesson-content { gap: 6px; }
+.lesson-card.mobile .lesson-meta:empty { display: none; }
+.lesson-card.mobile .lesson-status { margin-left: 0; }
+.lesson-card.mobile .lesson-kind { font-size: .75rem; }
+.agenda-time { display: grid; gap: 4px; flex: 0 0 74px; padding-right: 16px; border-right: 1px solid #15364613; font-variant-numeric: tabular-nums; }
+.agenda-time strong { font-size: 1.0625rem; color: var(--deep); }
+.agenda-time > span { color: var(--ink-soft); font-size: .875rem; }
+.agenda-arrow { font-size: 1.5rem; color: var(--muted); margin-left: auto; }
+.agenda-empty { display: grid; justify-items: center; gap: 8px; padding: 20px 8px; text-align: center; }
+.agenda-empty img { object-fit: contain; }
+.agenda-empty strong { font-size: 1.125rem; }
+.agenda-empty p { margin: 0; color: var(--ink-soft); font-size: .9375rem; }
+.empty-next-day { min-height: 44px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--deep); background: var(--blue-soft); font-size: .875rem; }
+.mobile-gesture-hint { display: none; font-size: .75rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
 body.view-week .schedule-scroll { display: block; }
-body.view-week .mobile-day-list { display: none; }
-body.view-day .schedule-scroll,
-body.view-day .scroll-hint { display: none; }
+body.view-week .mobile-day-list, body.view-week .day-picker, body.view-week .mobile-gesture-hint { display: none; }
+body.view-day .schedule-scroll, body.view-day .scroll-hint { display: none; }
 body.view-day .mobile-day-list { display: grid; }
-
+body.view-day .day-picker { display: grid; }
+body.view-day .course-legend { display: none; }
+.schedule-extras { margin-top: 24px; border: 1px solid var(--line); border-radius: 10px; background: #ffffff85; }
+.schedule-extras > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; padding: 12px 18px; list-style: none; cursor: pointer; color: var(--ink); font-size: .9375rem; font-weight: 650; }
+.schedule-extras > summary::-webkit-details-marker { display: none; }
+.extras-hint { color: var(--muted); font-size: .8125rem; font-weight: 400; }
+.extras-hint > span { display: inline-block; padding-left: 6px; }
+.schedule-extras[open] .extras-hint > span { transform: rotate(180deg); }
+.secondary-grid { margin: 0; padding: 0 18px 12px; gap: 24px; border-top: 1px solid var(--line-soft); }
+.summary-panel, .summary-panel + .summary-panel { padding: 16px 0; }
+.summary-panel + .summary-panel { padding-left: 20px; }
+.overview-body { min-height: 0; }
+.overview-mascot-slot, .overview-mascot { width: 90px; height: 55px; }
+.panel-mascot-chibi { width: 75px; height: 55px; }
+.overview-row { font-size: .875rem; }
+.notice-source-tag, .source-credit { font-size: .75rem; }
+.data-note, .data-note p { font-size: .8125rem; }
+.data-note-label { font-size: .8125rem; }
+.footer-inner { color: var(--muted); font-size: .75rem; }
+.source-credit { color: var(--muted); }
+.lesson-dialog { width: min(360px, calc(100vw - 32px)); max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: 12px; box-shadow: 0 16px 64px #102c3a30; }
+.lesson-dialog::backdrop, .week-calendar::backdrop { background: #09243355; }
+.dialog-close, .calendar-close { width: 44px; height: 44px; border: 0; border-radius: 7px; font-size: 1.5rem; }
+.dialog-close { top: 7px; right: 7px; }
+.dialog-topline { padding-right: 28px; font-size: .8125rem; }
+.dialog-title { margin: 14px 0 0; font-size: 1.375rem; line-height: 1.5; }
+.lesson-detail-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.lesson-detail-grid dt { color: var(--muted); font-size: .8125rem; }
+.lesson-detail-grid dd { margin: 5px 0 0; color: var(--deep); font-weight: 650; font-size: 1.0625rem; }
+.dialog-adjustment { margin-top: 16px; font-size: .875rem; }
+.week-calendar { position: fixed; inset: 0; width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; margin: auto; padding: 20px; transform: none; border-radius: 12px; }
+.week-calendar:not([open]) { display: none; }
+.week-calendar-head { gap: 8px; align-items: center; }
+.week-calendar-head strong { font-size: 1.125rem; }
+.week-calendar-head span, .calendar-legend, .calendar-weekdays, .month-day-tag, .calendar-note { font-size: .75rem; }
+.week-calendar-head span { margin-top: 4px; }
+.calendar-month-toolbar { grid-template-columns: 44px 1fr 44px; }
+.calendar-month-nav { width: 44px; height: 44px; border-radius: 6px; font-size: 1.5rem; }
+.calendar-month-toolbar strong { font-size: 1rem; }
+.month-day { min-height: 58px; border-radius: 5px; padding: 8px 6px; }
+.month-day-number { font-size: .9375rem; }
+.month-week-code { position: static; font-size: .75rem; }
+.month-day-tag { padding: 0 2px; }
+.calendar-legend-note { display: none; }
+.legend-holiday { background: #e27899; }
+.legend-adjusted { background: var(--orange); }
+.install-app-hint { border-radius: 8px; }
+.install-app-hint button, .install-guide-dialog { border-radius: 8px; }
+@media (max-width: 1100px) {
+  .page-frame { width: calc(100% - 32px); }
+  .race-masthead { grid-template-columns: minmax(0, 1.4fr) minmax(240px, .6fr); }
+  .race-masthead-copy { padding: 20px; }
+  .race-clock { display: none; }
+  .race-term { margin-left: auto; }
+  .circuit-watermark-label { font-size: .75rem; max-width: 130px; }
+  .hero-figure-bay { width: 100%; }
+  body.view-week .scroll-hint { display: block; }
+}
 @media (max-width: 760px) {
-  .toolbar-actions { flex-wrap: wrap; }
-  .view-switch { margin-left: 0; padding-left: 0; border-left: 0; border-top: 1px solid var(--line-soft); padding-top: 6px; width: 100%; }
-  body.view-week .schedule-scroll { display: block; overflow-x: auto; }
-  body.view-week .mobile-day-list { display: none; }
-  body.view-day .schedule-scroll { display: none; }
-  body.view-day .mobile-day-list { display: grid; }
+  html { scroll-padding-top: 8rem; }
+  body { background-image: none; padding-bottom: env(safe-area-inset-bottom); }
+  .page-frame { width: calc(100% - 24px); }
+  .page-content { margin-top: max(12px, env(safe-area-inset-top)); margin-bottom: 24px; }
+  .race-masthead { display: block; border-left-width: 3px; border-radius: 12px; }
+  .race-masthead-copy { padding: 16px; border: 0; }
+  .race-topline, .race-masthead-copy h1, .race-week-line, .race-meta-line { position: relative; z-index: 3; margin-right: 115px; }
+  .race-topline { gap: 0; }
+  .race-kicker { max-width: 200px; font-size: .75rem; letter-spacing: .06em; }
+  .race-term { display: none; }
+  .race-masthead-copy h1 { font-size: 1.625rem; margin-top: 8px; line-height: 1.25; }
+  .race-week-line { gap: 4px 6px; font-size: .875rem; }
+  .race-week-line strong { font-size: 1rem; }
+  .race-week-line > span[aria-hidden] { display: none; }
+  .race-meta-line { display: none; }
+  .race-masthead-art { position: absolute; z-index: 1; width: 132px; height: 145px; top: 3px; right: 0; background: none; pointer-events: none; }
+  .race-masthead-art::after, .race-masthead-art::before, .hero-figure-bay::before { display: none; }
+  .hero-figure-bay { width: 100%; background: none; }
+  .official-driver { width: 140px; height: 140px; right: -6px; bottom: 0; }
+  .race-masthead:hover .official-driver { transform: none; }
+  .circuit-watermark { inset: 8px -8px 8px -40px; }
+  .circuit-watermark-label, .circuit-watermark-sub, .telemetry-toast { display: none; }
+  .next-lesson { position: relative; z-index: 3; margin-top: 14px; padding: 11px 12px; background: #143b4a; }
+  #nextLesson { font-size: 1.0625rem; }
+  .next-lesson-top, .next-lesson-meta { font-size: .875rem; }
+  .next-lesson-arrow { font-size: 1.25rem; }
+  .week-toolbar { top: max(0px, env(safe-area-inset-top)); margin-top: 12px; padding: 8px; border-radius: 9px; }
+  .toolbar-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .week-navigation { gap: 4px; }
+  .week-arrow { width: 36px; min-height: 48px; }
+  .calendar-control { flex: 1; }
+  .calendar-button { min-width: 0; width: 100%; min-height: 48px; padding: 5px 7px; gap: 3px; border-color: transparent; }
+  .calendar-button > span:nth-child(2) { font-size: .875rem; }
+  .calendar-button-kicker { font-size: .75rem; white-space: nowrap; }
+  .calendar-glyph { display: none; }
+  .today-button { padding: 0 10px; min-height: 48px; font-size: .875rem; }
+  .view-switch { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; margin: 0; padding: 3px; }
+  .view-button { min-height: 38px; font-size: .875rem; }
+  .adjustment-banner { margin-top: 10px; padding: 9px 10px; align-items: flex-start; }
+  .adjustment-label { margin-top: 2px; }
+  .adjustment-copy { display: grid; gap: 2px; }
+  .adjustment-copy strong, .adjustment-copy span { font-size: .875rem; }
+  .schedule-section { margin-top: 18px; scroll-margin-top: 8rem; }
+  .section-heading { margin-bottom: 10px; gap: 8px; }
+  .section-heading h2 { font-size: 1rem; }
+  .course-legend { gap: 9px; font-size: .75rem; }
+  .course-legend span::before { margin-right: 4px; }
+  .day-picker { gap: 4px; margin-bottom: 12px; }
+  .day-picker-button { min-height: 78px; padding: 7px 2px; border-radius: 7px; gap: 3px; }
+  .day-picker-button > span { font-size: .8125rem; }
+  .day-picker-button strong { font-size: 1.25rem; }
+  .mobile-day { padding: 16px 12px; border-radius: 10px; }
+  .agenda-heading h3 { font-size: 1rem; gap: 6px; }
+  .agenda-heading h3 > span, .agenda-heading > span { font-size: .875rem; }
+  .lesson-card.mobile { min-height: 90px; padding: 12px 10px; gap: 12px; }
+  .agenda-time { flex-basis: 62px; padding-right: 10px; }
+  .agenda-time strong { font-size: 1rem; }
+  .lesson-card.mobile .lesson-name { font-size: 1rem; }
+  .lesson-card.mobile .lesson-room { font-size: .875rem; }
+  .agenda-arrow { font-size: 1.25rem; }
+  body.view-day .mobile-gesture-hint { display: block; }
+  .schedule-scroll { max-height: 72dvh; }
+  .schedule-extras { margin-top: 18px; }
+  .schedule-extras > summary { padding: 12px; }
+  .extras-hint { font-size: .75rem; }
+  .secondary-grid { grid-template-columns: 1fr; gap: 0; padding: 0 12px 8px; }
+  .summary-panel, .summary-panel + .summary-panel { padding: 16px 0; border-left: 0; }
+  .summary-panel + .summary-panel { border-top: 1px solid var(--line); }
+  .notice-entry { grid-template-columns: 1fr; gap: 5px; }
+  .notice-entry-detail, .notice-entry-detail span { justify-content: flex-start; text-align: left; }
+  .panel-heading-side { gap: 8px; }
+  .notice-links { gap: 4px; }
+  .data-note { align-items: flex-start; gap: 6px; }
+  .footer-inner { flex-direction: column; gap: 6px; padding: 14px 0; }
+  .lesson-dialog { inset: auto 0 0; width: 100%; max-width: 100%; margin: 0; max-height: 85dvh; padding: 26px 24px calc(26px + env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; border: 0; }
+  .lesson-dialog::before { content: ""; position: absolute; top: 9px; left: calc(50% - 18px); width: 36px; height: 4px; border-radius: 3px; background: #ccdae0; }
+  .lesson-detail-grid dd { font-size: 1.125rem; }
+  .week-calendar { inset: auto 0 0; width: 100%; max-width: 100%; max-height: 90dvh; margin: 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; }
+  .month-day { min-height: 56px; }
+  .install-app-hint { margin-top: 14px; font-size: .8125rem; }
+  .install-app-hint button { min-height: 44px; padding: 6px 10px; font-size: .8125rem; }
 }
-
-@media (max-width: 420px) {
-  .race-masthead-copy { padding: 12px 13px 11px; }
-  .race-masthead-copy h1 { font-size: 25px; }
-  .race-week-line { font-size: 13px; }
-  .race-week-line strong { font-size: 17px; }
-  .race-meta-line { gap: 8px; }
-  .race-meta-line .fact-status { flex-basis: 100%; padding-left: 0; border-left: 0; }
-  .race-masthead-art { min-height: 96px; }
-  .circuit-watermark { inset: 9px 7px 9px 7px; }
-  .telemetry-toast { right: 7px; bottom: 7px; gap: 5px; padding: 3px 5px 3px 6px; }
-  .circuit-watermark-label { top: 4px; left: 4px; font-size: 8px; }
-  .circuit-watermark-label strong { font-size: 12px; }
-  .circuit-watermark-sub { display: none; }
-  .hero-figure-bay { width: 64%; min-height: 96px; }
-  .official-driver { right: -8px; bottom: -12px; width: min(136%, 150px); height: 124px; }
-  .panel-heading { gap: 8px; }
-  .panel-heading-side { gap: 6px; }
-  .notice-links { flex-direction: column; align-items: flex-end; gap: 2px; }
-  .panel-mascot-chibi { width: 78px; height: 54px; }
-  .overview-body { min-height: 174px; }
-  .overview-list { max-width: 100%; }
-  .overview-mascot-slot { width: 80px; height: 46px; }
-  .overview-mascot { width: 80px; height: 46px; }
-  .mobile-day-content .lesson-card { min-height: 108px; }
-}
-
-@media (max-width: 560px) {
-  .week-calendar { padding: 11px; }
-  .calendar-weekdays,
-  .calendar-grid { gap: 3px; }
-  .month-day { min-height: 52px; padding: 6px 5px; }
-  .month-day-number { font-size: 12px; }
-  .month-week-code { top: 5px; right: 5px; font-size: 8px; }
-  .month-day-tag { padding: 1px 3px; font-size: 8px; }
-  .calendar-legend-note { flex-basis: 100%; margin-left: 0; }
-}
-
-@media (max-width: 760px) {
-  .notice-document { width: min(100% - 24px, 760px); margin: 24px auto; padding: 24px 20px 28px; }
-  .notice-summary dl > div { grid-template-columns: 1fr; gap: 3px; }
+@media (max-width: 380px) {
+  .page-frame { width: calc(100% - 16px); }
+  .race-masthead-copy { padding: 14px 12px; }
+  .race-topline, .race-masthead-copy h1, .race-week-line { margin-right: 92px; }
+  .race-masthead-art { width: 108px; }
+  .official-driver { width: 116px; }
+  .week-toolbar { padding: 6px; }
+  .toolbar-actions { gap: 6px; }
+  .week-arrow { width: 32px; }
+  .calendar-button { padding: 5px 2px; }
+  .calendar-button > span:nth-child(2) { font-size: .8125rem; }
+  .today-button { padding: 0 8px; }
+  .next-lesson { gap: 7px; }
+  .next-lesson-arrow { display: none; }
+  .extras-hint { display: none; }
+  .mobile-day { padding: 14px 10px; }
+  .lesson-card.mobile { gap: 8px; }
 }
 
 @media print {
@@ -1697,14 +1838,14 @@ body.view-day .mobile-day-list { display: grid; }
   .secondary-grid,
   .data-note,
   .site-footer,
-  .skip-link { display: none !important; }
+  .skip-link, .day-picker, .schedule-extras, .install-app-hint, .mobile-gesture-hint { display: none !important; }
   .page-content { margin: 0; }
   .week-toolbar { display: block; padding: 10px 0; border-top: 0; }
   .schedule-section { margin-top: 12px; }
   .section-heading { margin-bottom: 7px; }
-  .schedule-scroll { display: block !important; overflow: visible; border-color: #9ea9ae; }
+  .schedule-scroll { display: block !important; max-height: none; overflow: visible; border-color: #9ea9ae; }
   .schedule-table { min-width: 0; }
-  .weekday-row { grid-template-columns: 66px repeat(7, minmax(0, 1fr)); }
+  .weekday-row { position: static; grid-template-columns: 66px repeat(7, minmax(0, 1fr)); }
   .schedule-body { grid-template-columns: 66px minmax(0, 1fr); }
   .schedule-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .grid-corner,
@@ -1713,6 +1854,8 @@ body.view-day .mobile-day-list { display: grid; }
   .grid-corner { min-height: 54px; padding: 7px 8px; }
   .time-slot { padding: 0 3px; }
   .lesson-card { margin: 0; padding: 4px 5px 3px; }
+  .lesson-content { gap: 2px; }
+  .lesson-status, .course-legend { display: none; }
   .lesson-name { font-size: 11px; }
   .lesson-room,
   .lesson-time,
