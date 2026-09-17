@@ -3,29 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="app-release" content="2026-09-17.2" />
     <meta name="theme-color" content="#17242d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="南苑课表" />
     <meta name="description" content="南苑课表 · 2026-2027-1｜计算机科学与技术专业课程表。" />
     <link rel="icon" href="./icons/course-schedule-512.png" type="image/png" />
-    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="manifest" href="./manifest.webmanifest?v=6" />
     <link rel="apple-touch-icon" href="./icons/course-schedule-192.png" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
     <title>南苑课表 · 2026-2027-1</title>
   </head>
   <body>
-    <a class="skip-link" href="#scheduleSection">跳到周课表</a>
+    <a class="skip-link" href="#scheduleSection">跳到课表</a>
     <div class="app-shell">
       <main class="page-frame page-content">
         <section class="race-masthead" aria-labelledby="raceMastheadTitle">
           <div class="race-masthead-copy">
             <div class="race-topline">
               <span class="race-kicker">RACING MIKU 2025 SPA</span>
-              <span class="race-term">2026–2027 · TERM 1</span>
+              <span class="race-term">2026–2027 · 第1学期</span>
               <time id="liveClock" class="race-clock" datetime="" aria-label="北京时间">----.--.-- --:--:--</time>
             </div>
-            <h1 id="raceMastheadTitle">本周课表</h1>
+            <h1 id="raceMastheadTitle">南苑课表</h1>
             <div class="race-week-line">
               <strong id="weekTitle">第 2 周</strong>
               <span aria-hidden="true">·</span>
@@ -38,11 +39,14 @@
               <i aria-hidden="true"></i>
               <span id="weekStatus" class="fact-status">按个人课表</span>
             </div>
-            <div class="race-live-line" aria-live="polite">
-              <span class="live-pulse" aria-hidden="true"></span>
-              <span class="race-live-label">下一节课</span>
-              <span id="nextLesson">正在读取下一节课</span>
-            </div>
+            <button id="nextLessonButton" class="next-lesson" type="button" aria-label="查看下一节课程详情" disabled>
+              <span class="next-lesson-main">
+                <span class="next-lesson-top"><span id="nextLessonLabel">下一节课</span><span id="nextLessonStatus"></span></span>
+                <strong id="nextLesson">正在读取课程</strong>
+                <span id="nextLessonMeta" class="next-lesson-meta"></span>
+              </span>
+              <span class="next-lesson-arrow" aria-hidden="true">↗</span>
+            </button>
             <div id="phaseStrip" class="race-phase-strip" aria-label="一周节奏">
               <span class="phase-segment formation" data-phase-key="formation"><b>MON</b><span>FORMATION LAP</span></span>
               <span class="phase-segment stint" data-phase-key="stint"><b>TUE–THU</b><span>RACE STINT</span></span>
@@ -64,9 +68,9 @@
               <span class="circuit-watermark-sub">ARDENNES CIRCUIT</span>
             </div>
             <div class="hero-figure-bay">
-              <img class="official-driver" src="./assets/racing-miku-2025-spa-cutout-trim.png" alt="赛车初音 2025 SPA 透明立绘" loading="lazy" decoding="async" />
+              <img class="official-driver" src="./assets/racing-miku-2025-spa-cutout-trim.png" alt="赛车初音 2025 SPA 透明立绘" fetchpriority="high" decoding="async" />
             </div>
-            <div id="telemetryToast" class="telemetry-toast" hidden role="status" aria-live="polite">
+            <div id="telemetryToast" class="telemetry-toast" hidden aria-hidden="true">
               <span id="telemetryToastKicker" class="telemetry-toast-kicker">S1</span>
               <strong id="telemetryToastValue" class="telemetry-toast-value">—.---</strong>
               <span id="telemetryToastStatus" class="telemetry-toast-status">YELLOW</span>
@@ -76,17 +80,16 @@
         </section>
 
         <section class="week-toolbar" aria-label="周次控制">
-          <div class="toolbar-title">
-            <span class="toolbar-kicker">RACE CONTROL</span>
-          </div>
           <div class="toolbar-actions">
+            <div class="week-navigation" aria-label="选择教学周">
+              <button id="previousWeek" class="week-arrow" type="button" aria-label="上一周" title="上一周（←）">‹</button>
             <div class="calendar-control">
               <button id="calendarButton" class="calendar-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="weekCalendar">
-                <span class="calendar-button-kicker">选择教学周</span>
+                <span id="calendarButtonKicker" class="calendar-button-kicker">选择教学周</span>
                 <span id="calendarButtonLabel">第 2 周 · 9月14日–9月20日</span>
                 <span class="calendar-glyph" aria-hidden="true">▦</span>
               </button>
-              <div id="weekCalendar" class="week-calendar" role="dialog" aria-label="2026–2027学年第1学期教学周日历" hidden>
+              <dialog id="weekCalendar" class="week-calendar" aria-label="2026–2027学年第1学期教学周日历">
                 <div class="week-calendar-head">
                   <div>
                     <strong>教学周日历</strong>
@@ -95,7 +98,7 @@
                   <button id="closeCalendar" class="calendar-close" type="button" aria-label="关闭教学周日历">×</button>
                 </div>
                 <div class="calendar-legend" aria-label="日期标记说明">
-                  <span><i class="legend-selected" aria-hidden="true"></i>当前周</span>
+                  <span><i class="legend-selected" aria-hidden="true"></i>所选周</span>
                   <span><i class="legend-holiday" aria-hidden="true"></i>休假</span>
                   <span><i class="legend-adjusted" aria-hidden="true"></i>调休</span>
                   <span class="calendar-legend-note">仅显示本学期日期</span>
@@ -108,14 +111,16 @@
                 <div class="calendar-weekdays" aria-hidden="true">
                   <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
                 </div>
-                <div id="calendarGrid" class="calendar-grid month-calendar-grid" role="grid" aria-label="月份日期"></div>
+                <div id="calendarGrid" class="calendar-grid month-calendar-grid" aria-label="月份日期"></div>
                 <p class="calendar-note">国家安排为基准；学校、教务系统通知优先。</p>
-              </div>
+              </dialog>
+            </div>
+              <button id="nextWeek" class="week-arrow" type="button" aria-label="下一周" title="下一周（→）">›</button>
             </div>
             <button id="todayButton" class="today-button" type="button">今天</button>
             <div class="view-switch" role="group" aria-label="视图模式">
-              <button id="weekViewButton" class="view-button is-active" type="button" aria-pressed="true">周表</button>
-              <button id="dayViewButton" class="view-button" type="button" aria-pressed="false">按天</button>
+              <button id="weekViewButton" class="view-button is-active" type="button" aria-pressed="true">周课表</button>
+              <button id="dayViewButton" class="view-button" type="button" aria-pressed="false">日程</button>
             </div>
           </div>
         </section>
@@ -132,11 +137,12 @@
           <div class="section-heading">
             <div class="section-heading-title">
               <h2 id="scheduleTitle">周课表</h2>
-              <img class="section-mascot" src="./assets/racing-miku-2025-spa-pose-02-trim.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+
             </div>
+            <div class="course-legend" aria-label="课程颜色"><span class="legend-lecture">课程</span><span class="legend-practice">实训</span><span class="legend-night">晚课</span></div>
           </div>
 
-          <div class="schedule-scroll" aria-label="周课表，可左右滑动查看">
+          <div class="schedule-scroll" tabindex="0" role="region" aria-label="周课表，可上下或左右滚动，点击课程查看详情">
             <div class="schedule-table">
               <div class="weekday-row" id="weekdayRow"></div>
               <div class="schedule-body">
@@ -145,10 +151,12 @@
               </div>
             </div>
           </div>
-          <p class="scroll-hint">周表可横向拖动；日程视图按日期连续查看</p>
+          <p class="scroll-hint">左右滑动查看整周，点课程查看详情</p>
 
+          <nav id="dayPicker" class="day-picker" aria-label="选择查看日期"></nav>
           <div class="mobile-day-list" id="mobileDayList"></div>
-          <p class="mobile-gesture-hint">左右滑动切换教学周 · 点按日期展开课程</p>
+          <p class="mobile-gesture-hint">左右滑动切换日期</p>
+          <p id="scheduleAnnouncement" class="sr-only" role="status" aria-live="polite"></p>
         </section>
 
         <div id="installAppHint" class="install-app-hint" hidden aria-live="polite">
@@ -156,6 +164,8 @@
           <button id="installAppButton" type="button">添加到主屏幕</button>
         </div>
 
+        <details class="schedule-extras">
+          <summary><span>本周概览与调休</span><span class="extras-hint">查看完整安排 <span aria-hidden="true">⌄</span></span></summary>
         <section class="secondary-grid" aria-label="课表辅助信息">
           <article class="summary-panel" aria-labelledby="weekOverviewTitle">
             <div class="panel-heading">
@@ -187,6 +197,7 @@
           </article>
         </section>
 
+        </details>
         <section class="data-note" aria-label="调休规则">
           <span class="data-note-label">调休规则</span>
           <p>国家安排为基准；学校、教务系统通知优先。</p>
@@ -196,12 +207,13 @@
       <footer class="site-footer">
         <div class="page-frame footer-inner">
           <span>广州南方学院 · 2026–2027-1</span>
+          <span>版本 09.17.2 · <a href="./repair-cache.html?release=6">刷新到最新版</a></span>
           <a class="source-credit" href="https://www.goodsmileracing.com/cn/racingmiku2025_spa/" target="_blank" rel="noopener noreferrer">RACING MIKU 2025 SPA 素材来源</a>
         </div>
       </footer>
     </div>
 
-    <dialog id="lessonDialog" class="lesson-dialog" aria-label="课程信息">
+    <dialog id="lessonDialog" class="lesson-dialog" aria-labelledby="lessonDialogTitle">
       <button id="closeDialog" class="dialog-close" type="button" aria-label="关闭课程详情">×</button>
       <div id="dialogContent"></div>
     </dialog>
@@ -217,8 +229,8 @@
       </ul>
     </dialog>
 
-    <script src="./official-adjustments.js"></script>
-    <script src="./app.js"></script>
-    <script src="./pwa.js"></script>
+    <script src="./official-adjustments.js?v=6"></script>
+    <script src="./app.js?v=6"></script>
+    <script src="./pwa.js?v=6"></script>
   </body>
 </html>
