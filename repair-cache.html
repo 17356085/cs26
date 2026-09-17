@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c8c89"><title>刷新南苑课表</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#163532;background:#f0f8f7;color-scheme:light}body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px;box-sizing:border-box}main{max-width:420px;background:white;border-top:5px solid #11aaa3;border-radius:18px;padding:32px;box-shadow:0 12px 48px #12554a12}small{color:#087c77;letter-spacing:.08em}h1{font-size:26px}p{line-height:1.8;color:#526865}button,a{font:inherit}button{border:0;border-radius:12px;background:#087c77;color:white;padding:13px 20px;cursor:pointer}a{color:#087c77}button:focus-visible,a:focus-visible{outline:3px solid #e16b9a;outline-offset:4px}[hidden]{display:none}
+</style>
+</head>
+<body><main><small>NANYUAN · COURSE SCHEDULE</small><h1>刷新到最新版</h1><p id="status" role="status" aria-live="polite">正在连接最新版课表…</p><p>此操作只清理课表的离线页面缓存，保留你的个人设置。请在出现问题的浏览器中打开本页。</p><button id="retry" hidden>重新尝试</button><p><a href="./">返回课表</a></p></main>
+<script>
+(() => {
+  const status = document.getElementById("status");
+  const retry = document.getElementById("retry");
+  const run = async () => {
+    retry.hidden = true;
+    status.textContent = "正在连接最新版课表…";
+    const base = new URL("./", location.href);
+    const fresh = new URL("index.html", base);
+    fresh.searchParams.set("__refresh", String(Date.now()));
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(fresh.href, {cache: "no-store", signal: controller.signal});
+      if (!response.ok || new URL(response.url).origin !== location.origin) throw new Error("unavailable");
+      const html = await response.text();
+      const page = new DOMParser().parseFromString(html, "text/html");
+      if (page.querySelector('meta[name="app-release"]')?.content !== "2026-09-17.2") throw new Error("stale");
+      status.textContent = "已连接最新版，正在清理旧页面…";
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.filter((item) => item.scope === base.href).map(async (item) => {
+          if (!await item.unregister()) throw new Error("unregister failed");
+        }));
+      }
+      if ("caches" in window) {
+        const names = await caches.keys();
+        await Promise.all(names.filter((name) => name.startsWith("nanyuan-course-") || name.startsWith("cs26-shell-")).map((name) => caches.delete(name)));
+      }
+      const destination = new URL("./", base);
+      destination.searchParams.set("__refresh", String(Date.now()));
+      location.replace(destination.href);
+    } catch {
+      status.textContent = "暂时未能完成刷新。请确认网络连接后重试；如果仍然失败，请把当前网址和设备型号发给我们。";
+      retry.hidden = false;
+    } finally { clearTimeout(timeout); }
+  };
+  retry.addEventListener("click", run);
+  run();
+})();
+</script></body></html>
