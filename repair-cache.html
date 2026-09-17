@@ -25,7 +25,7 @@
       if (!response.ok || new URL(response.url).origin !== location.origin) throw new Error("unavailable");
       const html = await response.text();
       const page = new DOMParser().parseFromString(html, "text/html");
-      if (page.querySelector('meta[name="app-release"]')?.content !== "2026-09-17.2") throw new Error("stale");
+      if (page.querySelector('meta[name="app-release"]')?.content !== "2026-09-17.3") throw new Error("stale");
       status.textContent = "已连接最新版，正在清理旧页面…";
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
