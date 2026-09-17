@@ -1,6 +1,7 @@
 (() => {
-  const APP_VERSION = "2026-09-17.2";
+  const APP_VERSION = "2026-09-17.3";
   const SERVICE_WORKER_URL = "./sw.js";
+  const INSTALL_STATE_KEY = "nanyuan-course-install-complete";
 
   const installHint = document.querySelector("#installAppHint");
   const installButton = document.querySelector("#installAppButton");
@@ -22,14 +23,28 @@
   const isAndroid = /Android/i.test(userAgent);
   const isIOS = /iPhone|iPad|iPod/i.test(userAgent) || (globalThis.navigator?.platform === "MacIntel" && globalThis.navigator?.maxTouchPoints > 1);
   const isEmbeddedAndroid = isAndroid && /MicroMessenger|QQ\//i.test(userAgent);
+  const storage = (() => {
+    try { return globalThis.localStorage; } catch { return null; }
+  })();
+  const hasRecordedInstall = () => {
+    try { return storage?.getItem(INSTALL_STATE_KEY) === "1"; } catch { return false; }
+  };
+  let installComplete = isStandalone || hasRecordedInstall();
   let deferredInstallPrompt = null;
 
   const hideInstallHint = () => {
     if (installHint) installHint.hidden = true;
   };
 
+  const markInstallComplete = () => {
+    installComplete = true;
+    try { storage?.setItem(INSTALL_STATE_KEY, "1"); } catch { /* Storage may be unavailable. */ }
+    guideDialog?.close?.();
+    hideInstallHint();
+  };
+
   const showInstallHint = () => {
-    if (installHint && installButton && !isStandalone && isMobileContext) {
+    if (installHint && installButton && !installComplete && isMobileContext) {
       installHint.hidden = false;
     }
   };
@@ -37,10 +52,10 @@
   const updateInstallCopy = () => {
     if (!installButton) return;
     if (isAndroid) {
-      installButton.textContent = isEmbeddedAndroid ? "先用浏览器打开" : (deferredInstallPrompt ? "一键安装" : "看安装步骤");
+      installButton.textContent = isEmbeddedAndroid ? "先用浏览器打开" : (deferredInstallPrompt ? "快捷添加到桌面" : "查看安卓添加方法");
       if (installHintCopy) installHintCopy.textContent = deferredInstallPrompt
-        ? "检测到可安装版本，点这里直接添加"
-        : (isEmbeddedAndroid ? "当前应用内浏览器不能安装，请先用系统浏览器打开" : "安卓 Chrome：点右上角 ⋮ 添加到主屏幕");
+        ? "点击按钮，直接把课表添加到安卓桌面"
+        : (isEmbeddedAndroid ? "当前应用内浏览器不能安装，请先用系统浏览器打开" : "安卓 Chrome：点击按钮后按提示添加到桌面");
     } else if (isIOS) {
       installButton.textContent = "查看方法";
       if (installHintCopy) installHintCopy.textContent = "Safari：点分享按钮添加到主屏幕";
@@ -57,10 +72,10 @@
       guideDialog.showModal();
       return;
     }
-    globalThis.alert?.("请在浏览器菜单中选择“添加到主屏幕”。");
+    globalThis.alert?.("请在浏览器菜单中选择“添加到桌面”。");
   };
 
-  if (isStandalone || !isMobileContext) hideInstallHint();
+  if (installComplete || !isMobileContext) hideInstallHint();
   else showInstallHint();
 
   let registration = null;
@@ -125,15 +140,16 @@
       return;
     }
     deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
+    const choice = await deferredInstallPrompt.userChoice;
     deferredInstallPrompt = null;
     updateInstallCopy();
-    hideInstallHint();
+    if (choice?.outcome === "accepted") markInstallComplete();
+    else showInstallHint();
   });
 
   globalThis.addEventListener?.("appinstalled", () => {
     deferredInstallPrompt = null;
-    hideInstallHint();
+    markInstallComplete();
   });
 
   closeGuide?.addEventListener?.("click", () => guideDialog?.close?.());
