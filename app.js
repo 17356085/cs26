@@ -245,7 +245,9 @@ const savedViewMode = (() => {
   }
 })();
 const isCompactViewport = Boolean(globalThis.matchMedia?.("(max-width: 760px)")?.matches);
-let viewMode = isCompactViewport ? "day" : savedViewMode || "week";
+let viewMode = savedViewMode || (isCompactViewport ? "day" : "week");
+let selectedDate = isInTerm(todayIso) ? todayIso : toIso(getWeekStart(currentWeek));
+let lastLiveMinute = "";
 
 function getOfficialAdjustment(iso) {
   return getEffectiveAdjustments().find((item) => item.actualDate === iso) || null;
@@ -298,6 +300,7 @@ function setViewMode(mode) {
   dayViewButton?.setAttribute?.("aria-pressed", String(viewMode === "day"));
   weekViewButton?.classList?.toggle?.("is-active", viewMode === "week");
   dayViewButton?.classList?.toggle?.("is-active", viewMode === "day");
+  $("#scheduleTitle").textContent = viewMode === "day" ? "每日课程" : "一周课程";
 }
 
 function getDayState(date) {
@@ -389,24 +392,65 @@ function renderPhaseStrip(states) {
   phaseStrip.setAttribute("aria-label", currentPhase ? `本周节奏，当前 ${currentPhase.en}` : "一周节奏");
 }
 
-function getNextLessonText(states) {
-  const nowParts = getBjtParts();
-  const nowMinutes = Number(nowParts.hour) * 60 + Number(nowParts.minute);
-  const candidates = states.flatMap((state) => getVisibleLessons(state).map((item) => ({ state, item })));
-  const next = candidates.find(({ state, item }) => state.iso > todayIso || (state.iso === todayIso && timeToMinutes(item.time) >= nowMinutes));
-  if (next) {
-    const dayLabel = next.state.iso === todayIso ? "今天" : `${DAY_NAMES[next.state.naturalDay]} ${formatShortDate(next.state.iso)}`;
-    return `${dayLabel} · ${next.item.time.split("–")[0]} ${next.item.title}`;
+// The live card always follows Beijing time, independently of the browsed week.
+function getUpcomingLesson(fromIso = todayIso, nowMinutes = 0) {
+  const startIso = fromIso < TERM_START ? TERM_START : fromIso;
+  for (let date = parseDate(startIso); toIso(date) <= TERM_END; date = addDays(date, 1)) {
+    const state = getDayState(date);
+    const item = state.lessons.find((entry) => state.iso > fromIso || timeToMinutes(entry.time.split("–")[1]) > nowMinutes);
+    if (item) return { state, item };
   }
-  const first = candidates[0];
-  return first
-    ? `本周首站 · ${DAY_NAMES[first.state.naturalDay]} ${first.item.time.split("–")[0]} ${first.item.title}`
-    : "本周没有待上课程";
+  return null;
+}
+
+function getLessonStatus(item, state, now = new Date()) {
+  const parts = getBjtParts(now);
+  const iso = `${parts.year}-${parts.month}-${parts.day}`;
+  const minutes = Number(parts.hour) * 60 + Number(parts.minute);
+  if (state.iso < iso) return "ended";
+  if (state.iso > iso) return "upcoming";
+  const start = timeToMinutes(item.time);
+  const end = timeToMinutes(item.time.split("–")[1]);
+  return minutes >= end ? "ended" : minutes >= start ? "live" : "upcoming";
+}
+
+function renderLiveLesson(now = new Date()) {
+  const parts = getBjtParts(now);
+  const iso = `${parts.year}-${parts.month}-${parts.day}`;
+  const minutes = Number(parts.hour) * 60 + Number(parts.minute);
+  const next = getUpcomingLesson(iso, minutes);
+  const button = $("#nextLessonButton");
+  button.disabled = !next;
+  button.classList.toggle("is-live", Boolean(next && getLessonStatus(next.item, next.state, now) === "live"));
+  if (!next) {
+    $("#nextLessonLabel").textContent = "课程状态";
+    $("#nextLesson").textContent = "本学期课程已结束";
+    $("#nextLessonStatus").textContent = "";
+    $("#nextLessonMeta").textContent = "仍可切换周次回看课表";
+    delete button.dataset.lessonId;
+    delete button.dataset.date;
+    return;
+  }
+  const { item, state } = next;
+  const live = getLessonStatus(item, state, now) === "live";
+  const dayDifference = Math.round((parseDate(state.iso) - parseDate(iso)) / 86400000);
+  const dayLabel = dayDifference === 0 ? "今天" : dayDifference === 1 ? "明天" : `${formatShortDate(state.iso)} ${DAY_NAMES[state.naturalDay]}`;
+  const remaining = (live ? timeToMinutes(item.time.split("–")[1]) : timeToMinutes(item.time)) - minutes;
+  $("#nextLessonLabel").textContent = live ? "正在上课" : "下一节课";
+  $("#nextLesson").textContent = item.title;
+  $("#nextLessonStatus").textContent = live ? `${remaining} 分钟后下课` : dayDifference === 0
+    ? (remaining < 60 ? `${remaining} 分钟后` : `${Math.floor(remaining / 60)} 小时${remaining % 60 ? ` ${remaining % 60} 分钟` : ""}后`)
+    : dayDifference === 1 ? "明天" : `${dayDifference} 天后`;
+  $("#nextLessonMeta").textContent = `${dayLabel} · ${item.time} · ${item.room}${state.adjustment ? " · 调休" : ""}`;
+  button.dataset.lessonId = item.id;
+  button.dataset.date = state.iso;
+  button.setAttribute("aria-label", `${live ? "正在上课" : "下一节课"}：${item.title}，${dayLabel} ${item.time}，教室 ${item.room}，查看详情`);
 }
 
 const trackTelemetryState = {
   ready: false,
   running: true,
+  inView: true,
   reducedMotion: Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches),
   lap: 0,
   lapStartedAt: 0,
@@ -536,7 +580,7 @@ function updateTrackMarker(progress) {
 }
 
 function scheduleTrackAnimation() {
-  if (!trackTelemetryState.running || trackTelemetryState.frameRequested || typeof globalThis.requestAnimationFrame !== "function") return;
+  if (document.hidden || !trackTelemetryState.inView || !trackTelemetryState.running || trackTelemetryState.frameRequested || typeof globalThis.requestAnimationFrame !== "function") return;
   trackTelemetryState.frameRequested = true;
   globalThis.requestAnimationFrame((timestamp) => {
     trackTelemetryState.frameRequested = false;
@@ -612,18 +656,37 @@ function updateLiveClock() {
   const now = new Date();
   const nowParts = getBjtParts(now);
   if (liveClock) {
-    liveClock.textContent = formatBjtClock(now);
+    liveClock.textContent = `${nowParts.month}.${nowParts.day} ${nowParts.hour}:${nowParts.minute} 北京时间`;
     liveClock.dateTime = `${nowParts.year}-${nowParts.month}-${nowParts.day}T${nowParts.hour}:${nowParts.minute}:${nowParts.second}+08:00`;
   }
-  const nextTodayIso = getTodayIso();
-  if (nextTodayIso === todayIso) return;
-  todayIso = nextTodayIso;
-  const nextWeek = getWeekNumber(parseDate(todayIso));
-  if (nextWeek >= 1 && nextWeek <= WEEKS.length) {
-    currentWeek = nextWeek;
-    calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(todayIso)));
+  const nextTodayIso = getBjtDateIso(now);
+  const minuteKey = `${nextTodayIso} ${nowParts.hour}:${nowParts.minute}`;
+  if (minuteKey === lastLiveMinute) return;
+  lastLiveMinute = minuteKey;
+  if (nextTodayIso !== todayIso) {
+    const wasFollowingToday = selectedDate === todayIso;
+    todayIso = nextTodayIso;
+    if (wasFollowingToday && isInTerm(todayIso)) {
+      selectedDate = todayIso;
+      currentWeek = getWeekNumber(parseDate(todayIso));
+      calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(todayIso)));
+    }
     renderWeek();
   }
+  renderLiveLesson(now);
+  // Refresh status in place so minute ticks never discard keyboard focus.
+  document.querySelectorAll(".lesson-card[data-lesson-id]").forEach((card) => {
+    const state = getDayState(parseDate(card.dataset.date));
+    const item = state.lessons.find((entry) => entry.id === card.dataset.lessonId);
+    if (!item) return;
+    const status = getLessonStatus(item, state, now);
+    card.classList.toggle("is-live", status === "live");
+    card.classList.toggle("is-ended", status === "ended");
+    const label = card.querySelector(".lesson-status");
+    if (label) label.textContent = status === "live" ? "上课中" : status === "ended" ? "已结束" : "";
+  });
+  scheduleGrid.querySelector(".current-time-marker")?.remove();
+  scheduleGrid.insertAdjacentHTML("beforeend", getCurrentTimeMarker(getWeekStates()));
 }
 
 function getCurrentTimeMarker(states) {
@@ -642,10 +705,11 @@ function getCurrentTimeMarker(states) {
     : Math.min(Math.max(nowMinutes, start), end);
   if (nowMinutes < start) rowIndex -= 1;
 
-  const rowTop = SCHEDULE_ROW_HEIGHTS.slice(0, rowIndex).reduce((sum, height) => sum + height, 0);
+  const rowHeights = Array.from(timeRail.children, (slot, index) => slot.offsetHeight || SCHEDULE_ROW_HEIGHTS[index]);
+  const rowTop = rowHeights.slice(0, rowIndex).reduce((sum, height) => sum + height, 0);
   const activeRange = SCHEDULE_TIME_RANGES[rowIndex];
   const progress = (markerMinutes - activeRange[0]) / (activeRange[1] - activeRange[0]);
-  const top = rowTop + progress * SCHEDULE_ROW_HEIGHTS[rowIndex];
+  const top = rowTop + progress * rowHeights[rowIndex];
   const hours = nowParts.hour;
   const minutes = nowParts.minute;
   const left = ((state.naturalDay - 1) * 100) / 7;
@@ -654,16 +718,22 @@ function getCurrentTimeMarker(states) {
 
 function lessonMarkup(item, state, extraClass = "") {
   const typeClass = isNightLesson(item) ? "night" : item.type === "practice" ? "practice" : "lecture";
-  const adjustedClass = state.adjustment ? " adjusted" : "";
   const session = getLessonSession(item);
   const periodLabel = getPeriodLabel(item);
+  const status = getLessonStatus(item, state);
+  const classes = `${state.adjustment ? " adjusted" : ""}${status === "live" ? " is-live" : status === "ended" ? " is-ended" : ""}`;
+  const statusMarkup = `<span class="lesson-status">${status === "live" ? "上课中" : status === "ended" ? "已结束" : ""}</span>`;
   const kindMarkup = periodLabel ? `<span class="lesson-kind">${periodLabel}</span>` : "";
-  const style = extraClass.includes("mobile") ? "" : `style="--row:${item.row};--span:${item.span}"`;
-  return `<button class="lesson-card session-${session.code.toLowerCase()} ${typeClass}${adjustedClass} ${extraClass}" type="button" data-lesson-id="${item.id}" data-date="${state.iso}" ${style}>
-    <span class="lesson-session-code" aria-hidden="true">${session.code}</span>
-    <span class="lesson-meta">${kindMarkup}<span class="lesson-time">${item.time}</span></span>
-    <span class="lesson-name">${item.title}</span>
-    <span class="lesson-room">${item.room}</span>
+  const mobile = extraClass.includes("mobile");
+  const timeParts = item.time.split("–");
+  return `<button class="lesson-card session-${session.code.toLowerCase()} ${typeClass}${classes} ${extraClass}" type="button" data-lesson-id="${item.id}" data-date="${state.iso}" ${mobile ? "" : `style="--row:${item.row};--span:${item.span}"`} aria-label="${item.title}，${item.time}，教室 ${item.room}，查看详情">
+    ${mobile ? `<span class="agenda-time"><strong>${timeParts[0]}</strong><span>${timeParts[1]}</span></span>` : ""}
+    <span class="lesson-content">
+      <span class="lesson-meta">${kindMarkup}${mobile ? statusMarkup : `<span class="lesson-time">${item.time}</span>`}</span>
+      <span class="lesson-name">${item.title}</span>
+      <span class="lesson-room"><span aria-hidden="true">⌖</span> ${item.room}${!mobile ? statusMarkup : ""}</span>
+    </span>
+    ${mobile ? '<span class="agenda-arrow" aria-hidden="true">›</span>' : ""}
   </button>`;
 }
 
@@ -696,7 +766,7 @@ function renderWeekCalendar() {
       : "";
     const adjustmentHint = state.adjustment ? `，按${formatShortDate(state.sourceIso)}课表` : "";
     const label = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日${status ? ` · ${status}` : ""}${adjustmentHint}`;
-    return `<button class="month-day${statusClass}${selectedClass}${todayClass}${adjacentClass}" type="button" data-date="${inTerm ? iso : ""}" aria-label="${label}"${inTerm ? "" : " disabled"}>
+    return `<button class="month-day${statusClass}${selectedClass}${todayClass}${adjacentClass}" type="button" data-date="${inTerm ? iso : ""}" aria-label="${label}"${iso === todayIso ? ' aria-current="date"' : ""}${inTerm ? "" : " disabled"}>
       <span class="month-day-number">${date.getDate()}</span>
       ${mondayBadge}
       ${status ? `<span class="month-day-tag">${status}</span>` : ""}
@@ -707,7 +777,14 @@ function renderWeekCalendar() {
 
 function setCalendarOpen(open) {
   if (!weekCalendar || !calendarButton) return;
-  weekCalendar.hidden = !open;
+  if (open && !weekCalendar.open) {
+    calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(selectedDate)));
+    renderWeekCalendar();
+    weekCalendar.showModal();
+    weekCalendar.querySelector(`[data-date="${selectedDate}"]`)?.focus({ preventScroll: true });
+  } else if (!open && weekCalendar.open) {
+    weekCalendar.close();
+  }
   calendarButton.setAttribute("aria-expanded", String(open));
 }
 
@@ -787,55 +864,43 @@ function renderDesktopSchedule(states) {
   }).join("") + getCurrentTimeMarker(states);
 }
 
+function renderDayPicker(states) {
+  $("#dayPicker").innerHTML = states.map((state) => `<button type="button" class="day-picker-button${state.iso === selectedDate ? " is-selected" : ""}${state.iso === todayIso ? " is-today" : ""}${state.adjustment ? " is-adjusted" : ""}" data-select-date="${state.iso}" aria-pressed="${state.iso === selectedDate}"${state.iso === todayIso ? ' aria-current="date"' : ""} aria-label="${formatDateLong(state.iso)}，${state.adjustment ? "调休，" : ""}${state.lessons.length}节课${state.holiday ? "，休假" : ""}">
+    <span>${DAY_NAMES[state.naturalDay]}</span><strong>${parseDate(state.iso).getDate()}</strong><small>${state.adjustment ? "调休" : state.holiday ? "休假" : state.lessons.length ? `${state.lessons.length}节` : "休息"}</small>
+  </button>`).join("");
+}
+
 function renderMobileSchedule(states) {
-  const todayState = states.find((state) => state.iso === todayIso);
-  const focusState = todayState
-    || states.find((state) => getVisibleLessons(state).length)
-    || states.find((state) => state.adjustment)
-    || states[0];
-  const focusIso = focusState?.iso;
-  const mobileStates = todayState
-    ? [todayState, ...states.filter((state) => state.iso !== todayIso)]
-    : states;
-  mobileDayList.innerHTML = mobileStates.map((state) => {
-    const todayClass = state.iso === todayIso ? " is-today" : "";
-    const adjustedClass = state.adjustment ? " is-adjusted" : "";
-    const holidayClass = state.holiday ? " is-holiday" : "";
-    const phase = getDayPhase(state, states);
-    const lessons = getVisibleLessons(state);
-    const count = lessons.length ? `${lessons.length} 节` : state.adjustment ? "暂无对应课程" : state.holiday ? "休假" : "无安排";
-    const expanded = state.iso === focusIso;
-    const contentId = `mobile-day-content-${state.iso}`;
-    const content = lessons.length
-      ? lessons.map((item) => lessonMarkup(item, state, "mobile")).join("")
-      : `<div class="empty-day"><span class="empty-phase ${phase.key}">${phase.code}</span>${count ? `<span>${count}</span>` : ""}</div>`;
-    const todayBadge = state.iso === todayIso ? `<span class="mobile-day-badge">今天</span>` : "";
-    return `<article class="mobile-day${todayClass}${adjustedClass}${holidayClass}${expanded ? "" : " is-collapsed"}" data-date="${state.iso}" data-day-index="${state.naturalDay}">
-      <button class="mobile-day-header${adjustedClass}${holidayClass}" type="button" aria-expanded="${expanded}" aria-controls="${contentId}">
-        <span class="mobile-day-index" aria-hidden="true">${String(state.naturalDay).padStart(2, "0")}</span>
-        <div class="mobile-day-title"><div class="mobile-day-label"><span class="mobile-day-phase ${phase.key}" title="${phase.en}">${phase.code}</span>${todayBadge}</div><strong>${DAY_NAMES[state.naturalDay]}</strong><span class="mobile-day-date">${formatMonthDay(parseDate(state.iso))}${state.adjustment ? ` · 按${formatShortDate(state.sourceIso)}课表` : ""}</span></div>
-        <div class="mobile-day-summary"><span class="mobile-day-count">${count}</span><span class="mobile-day-arrow" aria-hidden="true">⌄</span></div>
-      </button>
-      <div id="${contentId}" class="mobile-day-content"${expanded ? "" : " hidden"}>${content}</div>
-    </article>`;
+  const state = states.find((day) => day.iso === selectedDate) || states[0];
+  if (!state) return;
+  selectedDate = state.iso;
+  renderDayPicker(states);
+  const lessons = getVisibleLessons(state);
+  let previousSession = "";
+  const content = lessons.map((item) => {
+    const session = getLessonSession(item).code;
+    const heading = session !== previousSession ? `<div class="agenda-session">${{ S1: "上午", S2: "下午", S3: "晚上" }[session]}<span aria-hidden="true">${session}</span></div>` : "";
+    previousSession = session;
+    return heading + lessonMarkup(item, state, "mobile");
   }).join("");
+  const next = !lessons.length ? getUpcomingLesson(toIso(addDays(parseDate(state.iso), 1))) : null;
+  const empty = `<div class="agenda-empty"><img src="./assets/racing-miku-2025-spa-chibi-trim.png" alt="" width="100" height="100" loading="lazy" /><strong>${state.holiday ? state.holiday.label : "这一天没有课程"}</strong><p>${state.holiday ? "课表已按休假安排调整" : "留一点时间，按自己的节奏来。"}</p>${next ? `<button type="button" class="empty-next-day" data-select-date="${next.state.iso}">下个上课日 · ${formatShortDate(next.state.iso)} <span aria-hidden="true">→</span></button>` : ""}</div>`;
+  mobileDayList.innerHTML = `<article class="mobile-day${state.iso === todayIso ? " is-today" : ""}" data-date="${state.iso}" data-day-index="${state.naturalDay}">
+    <div class="agenda-heading"><h3>${DAY_NAMES[state.naturalDay]}<span>${formatShortDate(state.iso)}</span>${state.iso === todayIso ? '<b class="today-badge">今天</b>' : ""}</h3><span>${lessons.length} 节课程</span></div>
+    ${state.adjustment ? `<p class="agenda-adjustment">调休 · 按 ${formatShortDate(state.sourceIso)}（${DAY_NAMES[state.sourceDay]}）课表上课</p>` : ""}
+    <div class="mobile-day-content">${lessons.length ? content : empty}</div>
+  </article>`;
 }
 
-function setMobileDayExpanded(article, expanded) {
-  if (!article) return;
-  const toggle = article.querySelector(".mobile-day-header");
-  const content = article.querySelector(".mobile-day-content");
-  article.classList.toggle("is-collapsed", !expanded);
-  toggle?.setAttribute?.("aria-expanded", String(expanded));
-  if (content) content.hidden = !expanded;
-}
-
-function handleMobileDayToggle(event) {
-  const toggle = event.target.closest?.(".mobile-day-header");
-  if (!toggle) return;
-  const article = toggle.closest(".mobile-day");
-  if (!article) return;
-  setMobileDayExpanded(article, toggle.getAttribute("aria-expanded") !== "true");
+function selectDate(iso, { focus = false } = {}) {
+  if (!isInTerm(iso)) return;
+  selectedDate = iso;
+  currentWeek = getWeekNumber(parseDate(iso));
+  calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(iso)));
+  renderWeek();
+  const state = getDayState(parseDate(iso));
+  $("#scheduleAnnouncement").textContent = `${formatDateLong(iso)}，${state.lessons.length}节课程`;
+  if (focus) $("#dayPicker").querySelector(`[data-select-date="${iso}"]`)?.focus({ preventScroll: true });
 }
 
 function renderOverview(states) {
@@ -905,10 +970,13 @@ function renderWeek() {
 
   weekTitle.textContent = `第 ${currentWeek} 周`;
   weekRange.textContent = `${formatMonthDay(start)} – ${formatMonthDay(end)}`;
-  if (calendarButtonLabel) calendarButtonLabel.textContent = `第 ${currentWeek} 周 · ${formatMonthDay(start)}–${formatMonthDay(end)}`;
+  if (calendarButtonLabel) calendarButtonLabel.textContent = `第 ${currentWeek} 周 · ${start.getMonth() + 1}.${start.getDate()}–${end.getMonth() + 1}.${end.getDate()}`;
   $("#lessonCount").textContent = totalLessons;
   $("#classDayCount").textContent = classDays;
-  $("#nextLesson").textContent = getNextLessonText(states);
+  renderLiveLesson();
+  $("#previousWeek").disabled = currentWeek === 1;
+  $("#nextWeek").disabled = currentWeek === WEEKS.length;
+  $("#calendarButtonKicker").textContent = currentWeek === getWeekNumber(parseDate(todayIso)) ? "本周 · 点击选日期" : "选择教学周";
   $("#weekStatus").textContent = adjustments && holidays
     ? `${adjustments} 天调休 · ${holidays} 天休假`
     : adjustments
@@ -927,6 +995,11 @@ function renderWeek() {
 
 function positionLessonDialog(anchor = lessonDialogAnchor) {
   if (!lessonDialog?.open || !anchor) return;
+  if (globalThis.matchMedia?.("(max-width: 760px)").matches) {
+    lessonDialog.style.left = "";
+    lessonDialog.style.top = "";
+    return;
+  }
   const anchorRect = anchor.getBoundingClientRect();
   const margin = 12;
   const gap = 10;
@@ -958,9 +1031,9 @@ function openLessonDialog(item, state, anchor) {
     : "";
   const session = getLessonSession(item);
   const phase = getDayPhase(state, getWeekStates(state.week));
-  dialogContent.innerHTML = `<div class="dialog-topline"><span>${session.code} · ${phase.code}</span><span>${formatDateLong(state.iso)}</span></div>
-    <h2 class="dialog-title">${item.title}</h2>
-    <div class="dialog-compact-meta"><strong>${item.time}</strong><span>${item.room}</span></div>
+  dialogContent.innerHTML = `<div class="dialog-topline"><span>${formatDateLong(state.iso)}</span></div>
+    <h2 id="lessonDialogTitle" class="dialog-title">${item.title}</h2>
+    <dl class="lesson-detail-grid"><div><dt>上课时间</dt><dd>${item.time}</dd></div><div><dt>教室</dt><dd>${item.room}</dd></div></dl>
     ${adjustedText}`;
   if (typeof lessonDialog.showModal === "function") {
     lessonDialog.showModal();
@@ -985,18 +1058,18 @@ function changeWeek(nextWeek) {
   scheduleSection?.classList?.remove("is-switching", "is-forward", "is-back");
   void scheduleSection?.offsetWidth;
   scheduleSection?.classList?.add("is-switching", `is-${direction}`);
+  const dayIndex = (parseDate(selectedDate).getDay() + 6) % 7;
   currentWeek = next;
+  selectedDate = toIso(addDays(getWeekStart(next), dayIndex));
   renderWeek();
+  $("#scheduleAnnouncement").textContent = `第 ${currentWeek} 周，${formatMonthDay(getWeekStart(currentWeek))}开始`;
   window.setTimeout(() => scheduleSection?.classList?.remove("is-switching", "is-forward", "is-back"), 420);
 }
 
 function focusDayInDayView(dayIndex) {
   setViewMode("day");
-  window.requestAnimationFrame(() => {
-    const day = mobileDayList.querySelector(`[data-day-index="${dayIndex}"]`);
-    setMobileDayExpanded(day, true);
-    day?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+  selectDate(toIso(addDays(getWeekStart(currentWeek), Number(dayIndex) - 1)));
+  $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function handleWeekdayActivate(event) {
@@ -1015,17 +1088,31 @@ window.setInterval(updateLiveClock, 1000);
 
 setupTrackTelemetry();
 
-calendarButton?.addEventListener?.("click", () => setCalendarOpen(weekCalendar?.hidden));
+calendarButton?.addEventListener?.("click", () => setCalendarOpen(!weekCalendar.open));
 $("#closeCalendar")?.addEventListener?.("click", closeWeekCalendar);
+weekCalendar.addEventListener("close", () => calendarButton.setAttribute("aria-expanded", "false"));
+weekCalendar.addEventListener("click", (event) => {
+  if (event.target !== weekCalendar) return;
+  const rect = weekCalendar.getBoundingClientRect();
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeWeekCalendar();
+});
 calendarGrid?.addEventListener?.("click", (event) => {
   const day = event.target.closest?.(".month-day[data-date]");
   if (!day || day.disabled) return;
-  const date = parseDate(day.dataset.date);
-  const week = getWeekNumber(date);
-  if (week < 1 || week > WEEKS.length) return;
-  calendarMonthIndex = Math.max(0, getCalendarMonthIndex(date));
-  changeWeek(week);
+  selectDate(day.dataset.date);
+  closeWeekCalendar();
+});
+calendarGrid.addEventListener("keydown", (event) => {
+  const day = event.target.closest(".month-day[data-date]");
+  const offset = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[event.key];
+  if (!day || !offset) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const iso = toIso(addDays(parseDate(day.dataset.date), offset));
+  if (!isInTerm(iso)) return;
+  calendarMonthIndex = getCalendarMonthIndex(parseDate(iso));
   renderWeekCalendar();
+  calendarGrid.querySelector(`[data-date="${iso}"]`)?.focus();
 });
 calendarMonthPrev?.addEventListener?.("click", () => {
   if (calendarMonthIndex <= 0) return;
@@ -1037,53 +1124,70 @@ calendarMonthNext?.addEventListener?.("click", () => {
   calendarMonthIndex += 1;
   renderWeekCalendar();
 });
-document.addEventListener("click", (event) => {
-  if (weekCalendar?.hidden) return;
-  if (weekCalendar?.contains(event.target) || calendarButton?.contains(event.target)) return;
-  closeWeekCalendar();
-});
+$("#previousWeek").addEventListener("click", () => changeWeek(currentWeek - 1));
+$("#nextWeek").addEventListener("click", () => changeWeek(currentWeek + 1));
 weekViewButton?.addEventListener?.("click", () => setViewMode("week"));
 dayViewButton?.addEventListener?.("click", () => setViewMode("day"));
 $("#todayButton").addEventListener("click", () => {
-  const todayWeek = getWeekNumber(parseDate(todayIso));
-  calendarMonthIndex = Math.max(0, getCalendarMonthIndex(parseDate(todayIso)));
-  if (isCompactViewport) setViewMode("day");
-  changeWeek(todayWeek >= 1 && todayWeek <= WEEKS.length ? todayWeek : 1);
-  window.requestAnimationFrame(() => {
-    const today = mobileDayList.querySelector(`[data-date="${todayIso}"]`);
-    if (isCompactViewport && today) {
-      setMobileDayExpanded(today, true);
-      today.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  });
+  if (!isInTerm(todayIso)) {
+    $("#scheduleAnnouncement").textContent = "今天不在本学期内，已返回第一周";
+    selectDate(TERM_START);
+  } else {
+    selectDate(todayIso);
+  }
+  if (globalThis.matchMedia?.("(max-width: 760px)").matches) setViewMode("day");
+  $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
 });
-
+$("#nextLessonButton").addEventListener("click", handleLessonClick);
 scheduleGrid.addEventListener("click", handleLessonClick);
-mobileDayList.addEventListener("click", handleMobileDayToggle);
 mobileDayList.addEventListener("click", handleLessonClick);
+function handleDateSelection(event) {
+  const button = event.target.closest("[data-select-date]");
+  if (button) selectDate(button.dataset.selectDate, { focus: true });
+}
+$("#dayPicker").addEventListener("click", handleDateSelection);
+mobileDayList.addEventListener("click", handleDateSelection);
+$("#dayPicker").addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  event.stopPropagation();
+  selectDate(toIso(addDays(parseDate(selectedDate), event.key === "ArrowRight" ? 1 : -1)), { focus: true });
+});
 let touchStart = null;
+let suppressLessonClickUntil = 0;
 mobileDayList.addEventListener("touchstart", (event) => {
-  const touch = event.changedTouches[0];
+  const touch = event.touches.length === 1 ? event.touches[0] : null;
   touchStart = touch ? { x: touch.clientX, y: touch.clientY } : null;
 }, { passive: true });
+mobileDayList.addEventListener("touchcancel", () => { touchStart = null; }, { passive: true });
 mobileDayList.addEventListener("touchend", (event) => {
   if (!touchStart) return;
   const touch = event.changedTouches[0];
   const deltaX = touch ? touch.clientX - touchStart.x : 0;
   const deltaY = touch ? touch.clientY - touchStart.y : 0;
   touchStart = null;
-  if (Math.abs(deltaX) < 56 || Math.abs(deltaX) < Math.abs(deltaY) * 1.35) return;
-  changeWeek(currentWeek + (deltaX < 0 ? 1 : -1));
+  if (Math.abs(deltaX) < 64 || Math.abs(deltaX) < Math.abs(deltaY) * 1.6) return;
+  suppressLessonClickUntil = Date.now() + 400;
+  selectDate(toIso(addDays(parseDate(selectedDate), deltaX < 0 ? 1 : -1)));
 }, { passive: true });
+mobileDayList.addEventListener("click", (event) => {
+  if (Date.now() < suppressLessonClickUntil) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);
 weekdayRow.addEventListener("click", handleWeekdayActivate);
 weekdayRow.addEventListener("keydown", handleWeekdayActivate);
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeWeekCalendar();
-  if (event.target.closest("input, select, textarea, [contenteditable=\"true\"]")) return;
-  if (event.key === "ArrowLeft") changeWeek(currentWeek - 1);
-  if (event.key === "ArrowRight") changeWeek(currentWeek + 1);
+  if (document.querySelector("dialog[open]") || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+  if (event.target.closest("input, select, textarea, [contenteditable='true']")) return;
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    if (event.target.closest(".schedule-scroll")) return;
+    event.preventDefault();
+    if (viewMode === "day") selectDate(toIso(addDays(parseDate(selectedDate), event.key === "ArrowRight" ? 1 : -1)));
+    else changeWeek(currentWeek + (event.key === "ArrowRight" ? 1 : -1));
+  }
+  if (event.target.closest("button, a, summary")) return;
   if (event.key.toLowerCase() === "w") setViewMode("week");
   if (event.key.toLowerCase() === "d") setViewMode("day");
 });
@@ -1100,3 +1204,27 @@ lessonDialog.addEventListener("close", () => {
 });
 window.addEventListener("resize", () => positionLessonDialog());
 window.addEventListener("scroll", () => positionLessonDialog(), { passive: true });
+// Pause the decorative lap when off screen or backgrounded to save battery.
+function resumeTrackTelemetry() {
+  if (document.hidden || !trackTelemetryState.inView || trackTelemetryState.reducedMotion) return;
+  beginTelemetryLap();
+  trackTelemetryState.running = true;
+  scheduleTrackAnimation();
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    updateLiveClock();
+    resumeTrackTelemetry();
+  }
+});
+if (typeof IntersectionObserver !== "undefined") {
+  new IntersectionObserver(([entry]) => {
+    trackTelemetryState.inView = entry.isIntersecting;
+    if (entry.isIntersecting) resumeTrackTelemetry();
+  }).observe($(".race-masthead-art"));
+}
+globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.addEventListener?.("change", (event) => {
+  trackTelemetryState.reducedMotion = event.matches;
+  trackTelemetryState.running = !event.matches;
+  if (!event.matches) resumeTrackTelemetry();
+});
