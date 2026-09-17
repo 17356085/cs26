@@ -1,9 +1,9 @@
-const APP_VERSION = "2026-09-17.2";
+const APP_VERSION = "2026-09-17.3";
 const CACHE_NAME = `nanyuan-course-${APP_VERSION}`;
 const base = self.registration.scope;
 const absolute = (path) => new URL(path, base).href;
 const INDEX = absolute("./index.html");
-const CORE_ASSETS = ["./index.html", "./styles.css?v=6", "./app.js?v=6", "./official-adjustments.js?v=6", "./pwa.js?v=6", "./manifest.webmanifest?v=6", "./icons/course-schedule-192.png", "./icons/course-schedule-512.png"];
+const CORE_ASSETS = ["./index.html", "./styles.css?v=7", "./app.js?v=7", "./official-adjustments.js?v=7", "./pwa.js?v=7", "./manifest.webmanifest?v=7", "./icons/course-schedule-192.png", "./icons/course-schedule-512.png"];
 const ownedCache = (name) => name.startsWith("nanyuan-course-") || name.startsWith("cs26-shell-");
 const unavailable = () => new Response("暂时无法连接，请联网后重试。", {status: 503, headers: {"Content-Type": "text/plain; charset=utf-8"}});
 const usable = (response, url) => {
