@@ -1,4 +1,7 @@
 (() => {
+  const APP_VERSION = "2026-09-17.2";
+  const SERVICE_WORKER_URL = "./sw.js";
+
   const installHint = document.querySelector("#installAppHint");
   const installButton = document.querySelector("#installAppButton");
   const installHintCopy = document.querySelector("#installAppHintCopy");
@@ -60,6 +63,55 @@
   if (isStandalone || !isMobileContext) hideInstallHint();
   else showInstallHint();
 
+  let registration = null;
+  let checkInFlight = false;
+  let lastCheck = 0;
+  let refreshing = false;
+  const reloadLatest = () => {
+    if (refreshing) return;
+    refreshing = true;
+    const url = new URL("./", location.href);
+    url.searchParams.set("__refresh", String(Date.now()));
+    location.replace(url.href);
+  };
+
+  const checkForUpdate = async () => {
+    if (document.hidden || checkInFlight || Date.now() - lastCheck < 30000) return;
+    checkInFlight = true;
+    lastCheck = Date.now();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      // A unique URL also bypasses cache-first workers left by old releases.
+      const response = await fetch(`./release.json?check=${Date.now()}`, {
+        cache: "no-store", signal: controller.signal
+      });
+      if (!response.ok || new URL(response.url).origin !== location.origin) return;
+      const release = await response.json();
+      if (typeof release.version === "string" && release.version !== APP_VERSION) reloadLatest();
+      registration?.update().catch(() => {});
+    } catch { /* Keep the current schedule available when offline. */ }
+    finally { clearTimeout(timeout); checkInFlight = false; }
+  };
+
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    // Keep one stable script URL: replacing a worker does not need unregister/reload loops.
+    navigator.serviceWorker.register(SERVICE_WORKER_URL, {
+      scope: "./", updateViaCache: "none"
+    }).then((value) => {
+      registration = value;
+      return value.update();
+    }).catch(() => {});
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkForUpdate();
+  });
+  window.addEventListener("pageshow", checkForUpdate);
+  window.addEventListener("online", checkForUpdate);
+  window.addEventListener("focus", checkForUpdate);
+  setInterval(checkForUpdate, 60000);
+  checkForUpdate();
+
   globalThis.addEventListener?.("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
@@ -91,7 +143,4 @@
     if (!inside) guideDialog.close();
   });
 
-  if ("serviceWorker" in globalThis.navigator && globalThis.location?.protocol === "https:") {
-    globalThis.navigator.serviceWorker.register("./sw.js?version=3", { scope: "./" }).catch(() => {});
-  }
 })();
