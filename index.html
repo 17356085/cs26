@@ -3,22 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="app-release" content="2026-09-17.3" />
+    <meta name="app-release" content="2026-11-15.1" />
     <meta name="theme-color" content="#17242d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="南苑课表" />
     <meta name="description" content="南苑课表 · 2026-2027-1｜计算机科学与技术专业课程表。" />
     <link rel="icon" href="./icons/course-schedule-512.png" type="image/png" />
-    <link rel="manifest" href="./manifest.webmanifest?v=7" />
+    <link rel="manifest" href="./manifest.webmanifest?v=8" />
     <link rel="apple-touch-icon" href="./icons/course-schedule-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=7" />
+    <link rel="stylesheet" href="./styles.css?v=8" />
+    <link rel="stylesheet" href="./semester.css?v=8" />
     <title>南苑课表 · 2026-2027-1</title>
   </head>
-  <body>
+  <body class="view-semester">
+    <a class="skip-link semester-skip" href="#semesterGrid">跳到周历课表</a>
     <a class="skip-link" href="#scheduleSection">跳到课表</a>
     <div class="app-shell">
       <main class="page-frame page-content">
+        <section id="semesterSection" class="semester-section" aria-labelledby="semesterTitle">
+          <header class="semester-header">
+            <h1 id="semesterTitle">2026–2027 学年第 1 学期周历课表</h1>
+            <p>第 1–17 周 <span aria-hidden="true">·</span> 红色为周五晚课 <span aria-hidden="true">·</span> 点击周标题查看详情</p>
+            <div class="semester-actions">
+              <button id="semesterTodayButton" type="button">查看今天</button>
+              <button id="semesterCurrentWeekButton" type="button">跳到本周</button>
+            </div>
+          </header>
+          <div id="semesterGrid" class="semester-grid" tabindex="-1"></div>
+        </section>
+
         <section class="race-masthead" aria-labelledby="raceMastheadTitle">
           <div class="race-masthead-copy">
             <div class="race-topline">
@@ -119,6 +133,7 @@
             </div>
             <button id="todayButton" class="today-button" type="button">今天</button>
             <div class="view-switch" role="group" aria-label="视图模式">
+              <button id="semesterViewButton" class="view-button" type="button">学期总览</button>
               <button id="weekViewButton" class="view-button is-active" type="button" aria-pressed="true">周课表</button>
               <button id="dayViewButton" class="view-button" type="button" aria-pressed="false">日程</button>
             </div>
@@ -136,7 +151,7 @@
         <section id="scheduleSection" class="schedule-section" aria-labelledby="scheduleTitle">
           <div class="section-heading">
             <div class="section-heading-title">
-              <h2 id="scheduleTitle">周课表</h2>
+              <h2 id="scheduleTitle" tabindex="-1">周课表</h2>
 
             </div>
             <div class="course-legend" aria-label="课程颜色"><span class="legend-lecture">课程</span><span class="legend-practice">实训</span><span class="legend-night">晚课</span></div>
@@ -207,7 +222,7 @@
       <footer class="site-footer">
         <div class="page-frame footer-inner">
           <span>广州南方学院 · 2026–2027-1</span>
-          <span>版本 09.17.3 · <a href="./repair-cache.html?release=7">刷新到最新版</a></span>
+          <span>版本 11.15.1 · <a href="./repair-cache.html?release=8">刷新到最新版</a></span>
           <a class="source-credit" href="https://www.goodsmileracing.com/cn/racingmiku2025_spa/" target="_blank" rel="noopener noreferrer">RACING MIKU 2025 SPA 素材来源</a>
         </div>
       </footer>
@@ -229,8 +244,9 @@
       </ul>
     </dialog>
 
-    <script src="./official-adjustments.js?v=7"></script>
-    <script src="./app.js?v=7"></script>
-    <script src="./pwa.js?v=7"></script>
+    <script src="./official-adjustments.js?v=8"></script>
+    <script src="./app.js?v=8"></script>
+    <script src="./semester.js?v=8"></script>
+    <script src="./pwa.js?v=8"></script>
   </body>
 </html>

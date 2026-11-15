@@ -1,0 +1,198 @@
+.semester-section { display: none; }
+.skip-link.semester-skip { display: none; }
+
+body.view-semester {
+  color: #243445;
+  background: #fff;
+}
+
+body.view-semester::before,
+body.view-semester::after,
+.view-semester .page-content > :not(.semester-section),
+.view-semester .site-footer,
+.view-semester .skip-link:not(.semester-skip) {
+  display: none;
+}
+
+.view-semester .skip-link.semester-skip { display: block; }
+
+.view-semester .semester-section {
+  display: block;
+  margin-inline: auto;
+  max-width: 1540px;
+  padding-block: clamp(22px, 4vw, 54px) 16px;
+}
+
+.semester-header {
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+.semester-header h1 {
+  margin: 0;
+  color: #133c62;
+  font-size: clamp(21px, 2.4vw, 32px);
+  line-height: 1.25;
+}
+
+.semester-header p {
+  margin: 8px 0 12px;
+  color: #4c5e72;
+  font-size: 13px;
+}
+
+.semester-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.semester-actions button {
+  padding: 5px 12px;
+  border: 1px solid #bad0e5;
+  border-radius: 4px;
+  background: #f5f9fd;
+  color: #133c62;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.semester-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.semester-week {
+  min-width: 0;
+  border: 1px solid #e2edf6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.semester-week h2,
+.semester-week dl,
+.semester-week dd,
+.semester-week ul { margin: 0; }
+
+.semester-week h2 button {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 3px 3px 0 0;
+  background: #dcebf9;
+  color: #133c62;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.semester-week h2 button:hover,
+.semester-actions button:hover { background: #c9e1f7; }
+
+.semester-week h2 button[aria-current="true"] {
+  scroll-margin-block-start: 12px;
+  background: #c9e1f7;
+}
+
+.semester-section button:focus-visible {
+  outline: 2px solid #205d90;
+  outline-offset: 2px;
+}
+
+.semester-divider { color: #647e97; }
+
+.semester-current-label {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #144a76;
+  color: #fff;
+  font-size: 10px;
+}
+
+.semester-day {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  min-height: 42px;
+}
+
+.semester-day + .semester-day { border-top: 1px solid #edf2f7; }
+
+.semester-day dt {
+  display: grid;
+  place-items: center;
+  padding: 4px 2px;
+  background: #eff6fd;
+  color: #214969;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.semester-day dd {
+  align-self: center;
+  min-width: 0;
+  padding: 5px 6px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.semester-day ul {
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.semester-lesson {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  gap: 5px;
+}
+
+.semester-time { font-variant-numeric: tabular-nums; }
+.semester-room { color: #4d5f71; }
+.semester-status { color: #526a82; }
+
+.semester-day.semester-evening {
+  border-color: #f3d4d5;
+  background: #fff1f1;
+  color: #a2272f;
+  font-weight: 650;
+}
+
+.semester-evening dt {
+  background: #fbe0e2;
+  color: inherit;
+}
+
+.semester-evening .semester-room { color: inherit; }
+
+@media (max-width: 1220px) {
+  .semester-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 920px) {
+  .semester-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 615px) {
+  .semester-grid { grid-template-columns: minmax(0, 1fr); }
+  .semester-day { grid-template-columns: 44px minmax(0, 1fr); }
+  .semester-day dt,
+  .semester-day dd { font-size: 12px; }
+}
+
+@media print {
+  .semester-section { print-color-adjust: exact; }
+  .view-semester .semester-section { padding: 0; }
+  .semester-actions { display: none; }
+  .semester-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .semester-week { break-inside: avoid; }
+}

@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "2026-09-17.3";
+  const APP_VERSION = "2026-11-15.1";
   const SERVICE_WORKER_URL = "./sw.js";
   const INSTALL_STATE_KEY = "nanyuan-course-install-complete";
 

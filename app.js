@@ -245,7 +245,8 @@ const savedViewMode = (() => {
   }
 })();
 const isCompactViewport = Boolean(globalThis.matchMedia?.("(max-width: 760px)")?.matches);
-let viewMode = savedViewMode || (isCompactViewport ? "day" : "week");
+let viewMode = "semester";
+let detailViewMode = savedViewMode || (isCompactViewport ? "day" : "week");
 let selectedDate = isInTerm(todayIso) ? todayIso : toIso(getWeekStart(currentWeek));
 let lastLiveMinute = "";
 
@@ -293,7 +294,11 @@ function getVisibleLessons(state) {
 
 function setViewMode(mode) {
   viewMode = mode;
-  try { globalThis.localStorage?.setItem("course-schedule-view", mode); } catch { /* private browsing */ }
+  if (mode !== "semester") {
+    detailViewMode = mode;
+    try { globalThis.localStorage?.setItem("course-schedule-view", mode); } catch { /* private browsing */ }
+  }
+  document.body.classList.toggle("view-semester", mode === "semester");
   document.body?.classList?.toggle("view-week", viewMode === "week");
   document.body?.classList?.toggle("view-day", viewMode === "day");
   weekViewButton?.setAttribute?.("aria-pressed", String(viewMode === "week"));
@@ -1180,6 +1185,7 @@ weekdayRow.addEventListener("click", handleWeekdayActivate);
 weekdayRow.addEventListener("keydown", handleWeekdayActivate);
 document.addEventListener("keydown", (event) => {
   if (document.querySelector("dialog[open]") || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+  if (viewMode === "semester") return;
   if (event.target.closest("input, select, textarea, [contenteditable='true']")) return;
   if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
     if (event.target.closest(".schedule-scroll")) return;
