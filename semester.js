@@ -1,5 +1,4 @@
 const semesterGrid = $("#semesterGrid");
-const semesterCurrentWeekButton = $("#semesterCurrentWeekButton");
 
 function semesterLessonList(lessons) {
   if (!lessons.length) return "";
@@ -26,7 +25,6 @@ function semesterDayRow(label, lessons, status = "", evening = false) {
 function renderSemester() {
   const todayWeek = isInTerm(todayIso) ? getWeekNumber(parseDate(todayIso)) : 0;
   const shortDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
-  semesterCurrentWeekButton.hidden = !todayWeek;
 
   semesterGrid.innerHTML = WEEKS.map((_, index) => {
     const week = index + 1;
@@ -51,20 +49,20 @@ function renderSemester() {
 
     return `
       <article class="semester-week">
-        <h2><button type="button" data-semester-week="${week}"${current ? ' aria-current="true"' : ""}>
+        <h3><button type="button" data-semester-week="${week}"${current ? ' aria-current="true"' : ""}>
           <span>第${week}周</span><span class="semester-divider" aria-hidden="true">|</span>
           <span>${shortDate(start)}–${year}${shortDate(friday)}</span>
           ${current ? '<span class="semester-current-label">本周</span>' : ""}
-        </button></h2>
+        </button></h3>
         <dl>${rows}</dl>
       </article>`;
   }).join("");
 }
 
 $("#semesterViewButton").addEventListener("click", () => {
-  setViewMode("semester");
+  if (viewMode === "semester") return;
   renderSemester();
-  semesterGrid.querySelector(`[data-semester-week="${currentWeek}"]`)?.focus();
+  setViewMode("semester");
 });
 
 semesterGrid.addEventListener("click", (event) => {
@@ -80,15 +78,3 @@ semesterGrid.addEventListener("click", (event) => {
   $("#scheduleTitle").focus();
 });
 
-semesterCurrentWeekButton.addEventListener("click", () => {
-  const current = semesterGrid.querySelector('[aria-current="true"]');
-  current?.focus({ preventScroll: true });
-  current?.scrollIntoView({ block: "start" });
-});
-
-$("#semesterTodayButton").addEventListener("click", () => {
-  setViewMode(detailViewMode);
-  $("#todayButton").click();
-});
-
-renderSemester();

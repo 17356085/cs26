@@ -245,8 +245,8 @@ const savedViewMode = (() => {
   }
 })();
 const isCompactViewport = Boolean(globalThis.matchMedia?.("(max-width: 760px)")?.matches);
-let viewMode = "semester";
 let detailViewMode = savedViewMode || (isCompactViewport ? "day" : "week");
+let viewMode = detailViewMode;
 let selectedDate = isInTerm(todayIso) ? todayIso : toIso(getWeekStart(currentWeek));
 let lastLiveMinute = "";
 
@@ -298,14 +298,18 @@ function setViewMode(mode) {
     detailViewMode = mode;
     try { globalThis.localStorage?.setItem("course-schedule-view", mode); } catch { /* private browsing */ }
   }
-  document.body.classList.toggle("view-semester", mode === "semester");
+  const isSemester = mode === "semester";
+  $("#scheduleSection").classList.toggle("is-semester", isSemester);
+  $("#semesterPanel").hidden = !isSemester;
+  $("#semesterViewButton").setAttribute("aria-pressed", String(isSemester));
+  $("#semesterViewButton").classList.toggle("is-active", isSemester);
   document.body?.classList?.toggle("view-week", viewMode === "week");
   document.body?.classList?.toggle("view-day", viewMode === "day");
   weekViewButton?.setAttribute?.("aria-pressed", String(viewMode === "week"));
   dayViewButton?.setAttribute?.("aria-pressed", String(viewMode === "day"));
   weekViewButton?.classList?.toggle?.("is-active", viewMode === "week");
   dayViewButton?.classList?.toggle?.("is-active", viewMode === "day");
-  $("#scheduleTitle").textContent = viewMode === "day" ? "每日课程" : "一周课程";
+  $("#scheduleTitle").textContent = isSemester ? "学期总览" : mode === "day" ? "每日课程" : "一周课程";
 }
 
 function getDayState(date) {
@@ -1140,7 +1144,11 @@ $("#todayButton").addEventListener("click", () => {
   } else {
     selectDate(todayIso);
   }
-  if (globalThis.matchMedia?.("(max-width: 760px)").matches) setViewMode("day");
+  if (globalThis.matchMedia?.("(max-width: 760px)").matches) {
+    setViewMode("day");
+  } else if (viewMode === "semester") {
+    setViewMode(detailViewMode);
+  }
   $("#scheduleSection").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 $("#nextLessonButton").addEventListener("click", handleLessonClick);

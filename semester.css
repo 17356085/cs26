@@ -1,61 +1,13 @@
-.semester-section { display: none; }
-.skip-link.semester-skip { display: none; }
-
-body.view-semester {
-  color: #243445;
-  background: #fff;
-}
-
-body.view-semester::before,
-body.view-semester::after,
-.view-semester .page-content > :not(.semester-section),
-.view-semester .site-footer,
-.view-semester .skip-link:not(.semester-skip) {
+#scheduleSection.is-semester > :is(.schedule-scroll, .scroll-hint, .day-picker, .mobile-day-list, .mobile-gesture-hint),
+#scheduleSection.is-semester .course-legend,
+#semesterPanel[hidden] {
   display: none;
 }
 
-.view-semester .skip-link.semester-skip { display: block; }
-
-.view-semester .semester-section {
-  display: block;
-  margin-inline: auto;
-  max-width: 1540px;
-  padding-block: clamp(22px, 4vw, 54px) 16px;
-}
-
-.semester-header {
-  margin-bottom: 26px;
-  text-align: center;
-}
-
-.semester-header h1 {
-  margin: 0;
-  color: #133c62;
-  font-size: clamp(21px, 2.4vw, 32px);
-  line-height: 1.25;
-}
-
-.semester-header p {
-  margin: 8px 0 12px;
-  color: #4c5e72;
+.semester-note {
+  margin: 0 0 12px;
+  color: var(--muted);
   font-size: 13px;
-}
-
-.semester-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.semester-actions button {
-  padding: 5px 12px;
-  border: 1px solid #bad0e5;
-  border-radius: 4px;
-  background: #f5f9fd;
-  color: #133c62;
-  font-size: 13px;
-  font-weight: 650;
 }
 
 .semester-grid {
@@ -67,17 +19,17 @@ body.view-semester::after,
 
 .semester-week {
   min-width: 0;
-  border: 1px solid #e2edf6;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
   background: #fff;
 }
 
-.semester-week h2,
+.semester-week h3,
 .semester-week dl,
 .semester-week dd,
 .semester-week ul { margin: 0; }
 
-.semester-week h2 button {
+.semester-week h3 button {
   position: relative;
   display: flex;
   justify-content: center;
@@ -86,7 +38,7 @@ body.view-semester::after,
   width: 100%;
   padding: 6px 4px;
   border: 0;
-  border-radius: 3px 3px 0 0;
+  border-radius: 5px 5px 0 0;
   background: #dcebf9;
   color: #133c62;
   font-size: 14px;
@@ -94,15 +46,13 @@ body.view-semester::after,
   line-height: 1.35;
 }
 
-.semester-week h2 button:hover,
-.semester-actions button:hover { background: #c9e1f7; }
+.semester-week h3 button:hover { background: #c9e1f7; }
 
-.semester-week h2 button[aria-current="true"] {
-  scroll-margin-block-start: 12px;
+.semester-week h3 button[aria-current="true"] {
   background: #c9e1f7;
 }
 
-.semester-section button:focus-visible {
+#semesterPanel button:focus-visible {
   outline: 2px solid #205d90;
   outline-offset: 2px;
 }
@@ -189,10 +139,14 @@ body.view-semester::after,
   .semester-day dd { font-size: 12px; }
 }
 
+@media (max-width: 760px) {
+  .week-toolbar .view-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .week-toolbar .view-button { padding-inline: 4px; white-space: nowrap; }
+}
+
 @media print {
-  .semester-section { print-color-adjust: exact; }
-  .view-semester .semester-section { padding: 0; }
-  .semester-actions { display: none; }
+  #scheduleSection.is-semester > .schedule-scroll { display: none !important; }
+  #semesterPanel { print-color-adjust: exact; }
   .semester-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
   .semester-week { break-inside: avoid; }
 }

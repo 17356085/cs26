@@ -1,17 +1,17 @@
-const APP_VERSION = "2026-11-15.1";
+const APP_VERSION = "2026-11-16.1";
 const CACHE_NAME = `nanyuan-course-${APP_VERSION}`;
 const base = self.registration.scope;
 const absolute = (path) => new URL(path, base).href;
 const INDEX = absolute("./index.html");
 const CORE_ASSETS = [
   "./index.html",
-  "./styles.css?v=8",
-  "./semester.css?v=8",
-  "./official-adjustments.js?v=8",
-  "./app.js?v=8",
-  "./semester.js?v=8",
-  "./pwa.js?v=8",
-  "./manifest.webmanifest?v=8",
+  "./styles.css?v=9",
+  "./semester.css?v=9",
+  "./official-adjustments.js?v=9",
+  "./app.js?v=9",
+  "./semester.js?v=9",
+  "./pwa.js?v=9",
+  "./manifest.webmanifest?v=9",
   "./icons/course-schedule-192.png",
   "./icons/course-schedule-512.png"
 ];
