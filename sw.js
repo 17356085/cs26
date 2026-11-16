@@ -1,4 +1,4 @@
-const APP_VERSION = "2026-11-16.1";
+const APP_VERSION = "2026-11-16.2";
 const CACHE_NAME = `nanyuan-course-${APP_VERSION}`;
 const base = self.registration.scope;
 const absolute = (path) => new URL(path, base).href;
@@ -8,9 +8,9 @@ const CORE_ASSETS = [
   "./styles.css?v=9",
   "./semester.css?v=9",
   "./official-adjustments.js?v=9",
-  "./app.js?v=9",
+  "./app.js?v=10",
   "./semester.js?v=9",
-  "./pwa.js?v=9",
+  "./pwa.js?v=10",
   "./manifest.webmanifest?v=9",
   "./icons/course-schedule-192.png",
   "./icons/course-schedule-512.png"
